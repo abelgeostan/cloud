@@ -31,16 +31,23 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         final String jwt;
         final String userEmail;
 
+        // Check if header is present and starts with "Bearer "
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
+        // Extract JWT token
         jwt = authHeader.substring(7);
+        
+        // Extract username/email from JWT token
         userEmail = jwtService.extractUsername(jwt);
 
+        // Proceed only if username is not null and no authentication is set yet
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             var userDetails = userDetailsService.loadUserByUsername(userEmail);
+            
+            // Validate token
             if (jwtService.isTokenValid(jwt, userDetails.getUsername())) {
                 var authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
