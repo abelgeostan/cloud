@@ -1,45 +1,65 @@
 package com.stancloud.cloud_backend.service;
 
+import com.stancloud.cloud_backend.dto.DriveContentsDTO;
+import com.stancloud.cloud_backend.dto.FileSimpleDTO;
+import com.stancloud.cloud_backend.dto.FolderSimpleDTO;
 import com.stancloud.cloud_backend.entity.*;
 import com.stancloud.cloud_backend.repository.*;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class DriveService {
-
-    private final FolderRepository folderRepository;
     private final FileDataRepository fileRepository;
+    private final FolderRepository folderRepository;
     private final UserRepository userRepository;
 
-    public Map<String, Object> listContents(Long folderId, String userEmail) {
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public DriveContentsDTO listContents(Long folderId, String userEmail) {
+        User owner = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        Folder parentFolder = null;
-        if (folderId != null) {
-            parentFolder = folderRepository.findById(folderId)
-                    .orElseThrow(() -> new RuntimeException("Folder not found"));
-        }
-
-        // Fetch folders
-        List<Folder> folders = folderRepository.findByOwnerAndParent(user, parentFolder);
-
-        // Fetch files
+        List<Folder> folders;
         List<FileData> files;
-        if (parentFolder == null) {
-            files = fileRepository.findAllByOwnerAndFolderIsNull(user);
+
+        if (folderId != null) {
+            // Get subfolders of the requested folder
+            folders = folderRepository.findByOwnerAndParentId(owner, folderId);
+            // Get files in the requested folder
+            files = fileRepository.findByOwnerAndFolderId(owner, folderId);
         } else {
-            files = fileRepository.findAllByOwnerAndFolder(user, parentFolder);
+            // Get root folders (no parent)
+            folders = folderRepository.findByOwnerAndParentIsNull(owner);
+            // Get root files (no folder)
+            files = fileRepository.findByOwnerAndFolderIsNull(owner);
         }
 
-        // Wrap in response map
-        Map<String, Object> response = new HashMap<>();
-        response.put("folders", folders);
-        response.put("files", files);
-        return response;
+        return new DriveContentsDTO(
+            folders.stream().map(this::convertToSimpleDTO).collect(Collectors.toList()),
+            files.stream().map(this::convertToSimpleDTO).collect(Collectors.toList())
+        );
     }
+
+    
+    private FolderSimpleDTO convertToSimpleDTO(Folder folder) {
+    return new FolderSimpleDTO(folder.getId(), folder.getName());
+    }
+
+    private FileSimpleDTO convertToSimpleDTO(FileData file) {
+        return new FileSimpleDTO(
+            file.getId(),
+            file.getFilename(),
+            file.getFileType(),
+            file.getFileSize(),
+            file.getStoragePath(),
+            file.getFolder() != null ? file.getFolder().getId() : null
+        );
+    }
+
+
 }

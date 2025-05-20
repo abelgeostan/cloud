@@ -1,6 +1,7 @@
 package com.stancloud.cloud_backend.controller;
 
 import com.stancloud.cloud_backend.dto.CreateFolderRequest;
+import com.stancloud.cloud_backend.dto.UpdateFolderRequest;
 import com.stancloud.cloud_backend.service.FolderService;
 
 import lombok.RequiredArgsConstructor;
@@ -28,5 +29,28 @@ public class FolderController {
         System.out.println("Listing folders for user: " + userEmail);
         return ResponseEntity.ok(folderService.listFolders(userEmail));
     }
+    // Get folder by ID
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getFolder(@PathVariable Long id) {
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        return ResponseEntity.ok(folderService.getFolder(id, userEmail));
+    }
+
+    // Update folder
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateFolder(@PathVariable Long id, 
+                                        @RequestBody UpdateFolderRequest request) {
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        return ResponseEntity.ok(folderService.updateFolder(id, request, userEmail));
+    }
+
+    // Delete folder
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteFolder(@PathVariable Long id) {
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        folderService.deleteFolder(id, userEmail);
+        return ResponseEntity.noContent().build();
+    }
+
 }
 

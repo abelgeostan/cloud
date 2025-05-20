@@ -6,8 +6,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
+// FolderRepository.java
 public interface FolderRepository extends JpaRepository<Folder, Long> {
     List<Folder> findAllByOwner(User user);
-    List<Folder> findByOwnerAndParent(User owner, Folder parent);
-    List<Folder> findByOwnerAndParentIsNull(User owner); // for root folders
+    List<Folder> findByOwnerAndParent(User owner, Folder parent);  // Changed parameter type
+    List<Folder> findByOwnerAndParentIsNull(User owner);
+    List<Folder> findByOwnerAndParentId(User owner, Long folderId);
 }
