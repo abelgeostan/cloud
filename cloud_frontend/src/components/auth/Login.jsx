@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TextField, Button, Container, Typography, Box } from '@mui/material';
-import authService from '../../services/authService';
+import authService from '../../services/authService'; // Correct path
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -13,9 +13,12 @@ const Login = () => {
     e.preventDefault();
     try {
       await authService.login(email, password);
-      navigate('/');
+      navigate('/'); // Navigate to the protected route after successful login
     } catch (err) {
-      setError('Login failed. Please check your credentials.');
+      // Log the full error for debugging
+      console.error("Login attempt failed:", err);
+      // Display a more user-friendly error message
+      setError('Login failed. Please check your credentials and try again.');
     }
   };
 

@@ -15,6 +15,8 @@ const login = (email, password) => {
     email,
     password
   }).then(response => {
+    // Assuming your backend sends the token directly in the response data,
+    // e.g., { token: "your-jwt-token", ...otherUserData }
     if (response.data.token) {
       localStorage.setItem('user', JSON.stringify(response.data));
     }
@@ -26,8 +28,15 @@ const logout = () => {
   localStorage.removeItem('user');
 };
 
+// Helper to get the current user data from localStorage
+const getCurrentUser = () => {
+  const user = localStorage.getItem('user');
+  return user ? JSON.parse(user) : null;
+};
+
 export default {
   register,
   login,
-  logout
+  logout,
+  getCurrentUser // Export this helper function
 };
