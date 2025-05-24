@@ -1,15 +1,16 @@
 import React from 'react';
 import { List, ListItem, ListItemIcon, ListItemText, Collapse } from '@mui/material';
 import FolderIcon from '@mui/icons-material/Folder';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack'; // Import the back arrow icon
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'; // Still imported, but not used for folder icons
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'; // This will be the only icon used for folders
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 const FileExplorer = ({ folders, onFolderClick, currentFolder, currentPathSegments, onGoBack }) => {
   const [expandedFolders, setExpandedFolders] = React.useState([]);
 
   const handleClick = (folderId, folderName) => {
-    onFolderClick(folderId, folderName); // Pass folderName to the parent handler
+    onFolderClick(folderId, folderName);
+    // The expansion state is still managed, but the icon won't change visually
     setExpandedFolders(prev =>
       prev.includes(folderId)
         ? prev.filter(id => id !== folderId)
@@ -20,11 +21,14 @@ const FileExplorer = ({ folders, onFolderClick, currentFolder, currentPathSegmen
   return (
     <List sx={{ width: '100%' }}>
       {/* Conditionally render the Back button */}
-      {currentPathSegments.length > 1 && ( // Only show if not at the root
+      {currentPathSegments.length > 1 && (
         <ListItem
           button
-          onClick={onGoBack} // Call the go back handler
-          sx={{ bgcolor: '#e0e0e0', '&:hover': { bgcolor: '#d0d0d0' } }} // Styling for back button
+          onClick={onGoBack}
+          sx={{
+            bgcolor: '#1A202C', // Current background color for the back button
+            '&:hover': { bgcolor: '#2A303C' } // Current hover color for the back button
+          }}
         >
           <ListItemIcon>
             <ArrowBackIcon />
@@ -34,7 +38,7 @@ const FileExplorer = ({ folders, onFolderClick, currentFolder, currentPathSegmen
       )}
 
       {/* Root folder entry - only show if at root or if you want it always visible */}
-      {currentPathSegments.length === 1 && ( // Only show 'My Drive' if currently at root
+      {currentPathSegments.length === 1 && (
         <ListItem
           button
           onClick={() => handleClick(null, 'My Drive')}
@@ -55,10 +59,8 @@ const FileExplorer = ({ folders, onFolderClick, currentFolder, currentPathSegmen
             selected={currentFolder === folder.id}
           >
             <ListItemIcon>
-              {/* You might want to show expand/collapse icons only if a folder has subfolders */}
-              {expandedFolders.includes(folder.id)
-                ? <ExpandMoreIcon />
-                : <ChevronRightIcon />}
+              {/* Changed: Always display ChevronRightIcon */}
+              <ChevronRightIcon />
             </ListItemIcon>
             <ListItemIcon>
               <FolderIcon />

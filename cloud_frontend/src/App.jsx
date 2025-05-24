@@ -1,8 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { createTheme, ThemeProvider } from '@mui/material/styles'; // Import createTheme and ThemeProvider
-import { purple } from '@mui/material/colors'; // Import purple color palette
-import CssBaseline from '@mui/material/CssBaseline'; // Import CssBaseline for consistent styling
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { purple } from '@mui/material/colors';
+import CssBaseline from '@mui/material/CssBaseline';
 
 // Correct paths for components
 import ProtectedRoute from './components/ProtectedRoute';
@@ -15,68 +15,88 @@ import Dashboard from './pages/Dashboard';
 // Define your custom dark theme
 const darkTheme = createTheme({
   palette: {
-    mode: 'dark', // Enable dark mode for Material-UI components
+    mode: 'dark',
     primary: {
-      main: purple[700], // A vibrant purple for primary elements (buttons, icons)
+      main: purple[700],
     },
     background: {
-      default: '#0A0A2A', // Very dark blue, almost black, for the main background
-      paper: '#1A202C',   // Slightly lighter dark blue for surfaces like cards, app bars, menus
+      default: '#0A0A2A',
+      paper: '#1A202C',
     },
     text: {
-      primary: '#E0E0E0', // Light grey for primary text on dark backgrounds
-      secondary: '#B0B0B0', // Slightly darker grey for secondary text
+      primary: '#E0E0E0',
+      secondary: '#B0B0B0',
     },
   },
   components: {
     // Override component styles to ensure consistency with the new theme
+    MuiCssBaseline: { // Target CssBaseline to remove default body margins/paddings
+      styleOverrides: {
+        html: {
+          margin: 0,
+          padding: 0,
+          boxSizing: 'border-box', // Ensure consistent box model
+        },
+        body: {
+          margin: 0,
+          padding: 0,
+          // Ensure the background color covers the entire viewport
+          backgroundColor: '#0A0A2A',
+          boxSizing: 'border-box', // Ensure consistent box model
+          overflowX: 'hidden', // Prevent horizontal scrolling if content overflows
+        },
+        '*, *::before, *::after': { // Apply box-sizing to all elements for consistency
+            boxSizing: 'inherit',
+        },
+      },
+    },
     MuiAppBar: {
       styleOverrides: {
         root: {
-          backgroundColor: '#1A202C', // Ensure TopBar background matches background.paper
+          backgroundColor: '#1A202C',
         },
       },
     },
     MuiButton: {
         styleOverrides: {
             outlined: {
-                color: purple[500], // Adjust color for outlined buttons
+                color: purple[500],
                 borderColor: purple[500],
             },
         },
     },
-    MuiList: { // For FileExplorer sidebar list
+    MuiList: {
         styleOverrides: {
             root: {
-                backgroundColor: '#1A202C', // Match sidebar background to background.paper
+                backgroundColor: '#1A202C',
             }
         }
     },
-    MuiListItem: { // For selected items in FileExplorer
+    MuiListItem: {
         styleOverrides: {
             root: {
                 '&.Mui-selected': {
-                    backgroundColor: purple[900], // Darker purple for selected state
+                    backgroundColor: purple[900],
                     '&:hover': {
-                        backgroundColor: purple[800], // Even darker on hover for selected
+                        backgroundColor: purple['A700'],
                     },
                 },
             },
         },
     },
-    MuiPaper: { // For ContextMenu and other Paper-based components
+    MuiPaper: {
         styleOverrides: {
             root: {
-                backgroundColor: '#1A202C', // Match background.paper
+                backgroundColor: '#1A202C',
             },
         },
     },
-    MuiTextField: { // For search bar and login/register inputs
+    MuiTextField: {
         styleOverrides: {
             root: {
                 '& .MuiOutlinedInput-root': {
                     '& fieldset': {
-                        borderColor: '#424242', // Lighter border for text fields
+                        borderColor: '#424242',
                     },
                     '&:hover fieldset': {
                         borderColor: purple[500],
@@ -86,10 +106,10 @@ const darkTheme = createTheme({
                     },
                 },
                 '& .MuiInputBase-input': {
-                    color: '#E0E0E0', // Text color in input fields
+                    color: '#E0E0E0',
                 },
                 '& .MuiInputLabel-root': {
-                    color: '#B0B0B0', // Label color for input fields
+                    color: '#B0B0B0',
                 },
             },
         },
@@ -100,7 +120,7 @@ const darkTheme = createTheme({
 function App() {
   return (
     <ThemeProvider theme={darkTheme}>
-      <CssBaseline /> {/* Resets browser default styles and applies basic Material-UI dark mode styles */}
+      <CssBaseline />
       <Router>
         <Layout>
           <Routes>

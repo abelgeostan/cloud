@@ -14,7 +14,6 @@ const Dashboard = () => {
   const [folders, setFolders] = useState([]);
   const [files, setFiles] = useState([]);
   const [currentFolder, setCurrentFolder] = useState(null);
-  // New state to manage the path segments for breadcrumbs
   const [currentPathSegments, setCurrentPathSegments] = useState([{ id: null, name: 'My Drive' }]);
   const [contextMenu, setContextMenu] = useState(null);
   const navigate = useNavigate();
@@ -60,35 +59,25 @@ const Dashboard = () => {
   }, []);
 
   const handleFolderClick = async (folderId, folderName) => {
-    setCurrentFolder(folderId); // Update current folder ID for API calls
+    setCurrentFolder(folderId);
 
-    // Logic to update currentPathSegments for breadcrumbs
+    const existingPathIndex = currentPathSegments.findIndex(segment => segment.id === folderId);
+
     if (folderId === null) {
-      // Clicked 'My Drive' (root)
       setCurrentPathSegments([{ id: null, name: 'My Drive' }]);
+    } else if (existingPathIndex !== -1) {
+      setCurrentPathSegments(currentPathSegments.slice(0, existingPathIndex + 1));
     } else {
-      // Find if the clicked folder's ID is already in the current path
-      const existingPathIndex = currentPathSegments.findIndex(segment => segment.id === folderId);
-
-      if (existingPathIndex !== -1) {
-        // User clicked an ancestor or the current folder itself in the path
-        // Trim the path to include only up to the clicked segment
-        setCurrentPathSegments(currentPathSegments.slice(0, existingPathIndex + 1));
-      } else {
-        // User clicked a new subfolder. Assume it's a direct child of the *current* last segment.
-        // Append the new folder to the path.
-        setCurrentPathSegments([...currentPathSegments, { id: folderId, name: folderName }]);
-      }
+      setCurrentPathSegments([...currentPathSegments, { id: folderId, name: folderName }]);
     }
 
-    loadContents(folderId); // Load contents of the clicked folder
+    loadContents(folderId);
   };
 
-  // New function to navigate back to the parent folder
   const handleGoBack = () => {
-    if (currentPathSegments.length > 1) { // Ensure we are not at the root
+    if (currentPathSegments.length > 1) {
       const parentPathSegments = currentPathSegments.slice(0, currentPathSegments.length - 1);
-      const parentFolder = parentPathSegments[parentPathSegments.length - 1]; // Get the new last segment (parent)
+      const parentFolder = parentPathSegments[parentPathSegments.length - 1];
       setCurrentPathSegments(parentPathSegments);
       setCurrentFolder(parentFolder.id);
       loadContents(parentFolder.id);
@@ -160,7 +149,7 @@ const Dashboard = () => {
   const handleUploadFile = async (filesToUpload) => {
     console.log('[Dashboard] Uploading files:', filesToUpload);
     if (filesToUpload.length > 0) {
-      const file = filesToUpload[0]; // Assuming single file upload for simplicity
+      const file = filesToUpload[0];
       try {
         console.log(`[Dashboard] Sending file "${file.name}" to backend for upload.`);
         await fileService.uploadFile(file, currentFolder);
@@ -173,20 +162,29 @@ const Dashboard = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', height: '100vh' }}>
+    // Outer Box for the entire dashboard layout (sidebar + main content)
+    // Forced width to 100vw to eliminate potential right-side whitespace from body/html defaults
+    <Box sx={{ display: 'flex', height: '100vh', flexDirection: { xs: 'column', md: 'row' }, width: '100vw' }}>
       {/* Sidebar */}
-      <Box sx={{ width: 250, bgcolor: 'background.paper', borderRight: '1px solid #ddd' }}>
+      <Box sx={{
+        width: { xs: '100%', md: 250 },
+        height: { xs: 'auto', md: '100vh' },
+        bgcolor: 'background.paper',
+        borderRight: { xs: 'none', md: '1px solid #ddd' },
+        borderBottom: { xs: '1px solid #ddd', md: 'none' },
+        display: { xs: 'none', md: 'block' },
+      }}>
         <FileExplorer
           folders={folders}
           onFolderClick={handleFolderClick}
           currentFolder={currentFolder}
-          currentPathSegments={currentPathSegments} // Pass path segments
-          onGoBack={handleGoBack} // Pass the new go back handler
+          currentPathSegments={currentPathSegments}
+          onGoBack={handleGoBack}
         />
       </Box>
 
-      {/* Main Content */}
-      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      {/* Main Content Area */}
+      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', width: '100%' }}>
         <TopBar
           onCreateFolder={handleCreateFolder}
           onUploadFile={handleUploadFile}
@@ -196,7 +194,7 @@ const Dashboard = () => {
         {/* Current folder path display */}
         <Box sx={{ px: 3, pt: 2, pb: 1 }}>
           <Typography variant="caption" component="div" sx={{ fontStyle: 'italic' }}>
-            /{currentPathSegments.map(segment => segment.name).join('/')}
+            Current Folder: /{currentPathSegments.map(segment => segment.name).join('/')}
           </Typography>
         </Box>
 
@@ -227,54 +225,83 @@ const Dashboard = () => {
             </Button>
           </Box>
         ) : (
-          <Grid container spacing={2} sx={{ p: 3 }}>
+          // Grid container for folders and files
+          <Grid container spacing={2} sx={{ width: '100%', margin: 0, px: 3, py: 2 }}>
             {folders.map(folder => (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={folder.id}>
+              <Grid item key={folder.id}> {/* Removed responsive sizing from Grid item */}
                 <Box
                   sx={{
                     p: 2,
                     border: '1px solid #ddd',
                     borderRadius: 1,
-                    '&:hover': { bgcolor: '#f5f5f5' },
-                    width: 140,
-                    height: 120,
+                    '&:hover': { bgcolor: '#2A303C' },
+                    width: 140, // Fixed width for uniform tiles
+                    height: 120, // Fixed height for uniform tiles
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    justifyContent: 'center',
+                    justifyContent: 'center', // Center content vertically
                     textAlign: 'center',
-                    overflow: 'hidden'
+                    overflow: 'hidden',
                   }}
                   onClick={() => handleFolderClick(folder.id, folder.name)}
                   onContextMenu={(e) => handleContextMenu(e, { type: 'folder', ...folder })}
                 >
                   <FolderIcon color="primary" sx={{ fontSize: 40, mb: 1 }} />
-                  <Typography noWrap sx={{ width: '100%' }}>{folder.name}</Typography>
+                  <Typography
+                    sx={{
+                      width: '100%',
+                      maxHeight: '2.5em',
+                      lineHeight: '1.25em',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'normal',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                    }}
+                  >
+                    {folder.name}
+                  </Typography>
                 </Box>
               </Grid>
             ))}
 
             {files.map(file => (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={file.id}>
+              <Grid item key={file.id}> {/* Removed responsive sizing from Grid item */}
                 <Box
                   sx={{
                     p: 2,
                     border: '1px solid #ddd',
                     borderRadius: 1,
-                    '&:hover': { bgcolor: '#f5f5f5' },
-                    width: 140,
-                    height: 120,
+                    '&:hover': { bgcolor: '#2A303C' },
+                    width: 140, // Fixed width for uniform tiles
+                    height: 120, // Fixed height for uniform tiles
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    justifyContent: 'center',
+                    justifyContent: 'center', // Center content vertically
                     textAlign: 'center',
-                    overflow: 'hidden'
+                    overflow: 'hidden',
                   }}
                   onContextMenu={(e) => handleContextMenu(e, { type: 'file', ...file })}
                 >
-                  <Typography noWrap sx={{ width: '100%' }}>{file.filename}</Typography>
-                  <Typography variant="caption" sx={{ width: '100%' }}>{file.fileSize} bytes</Typography>
+                  <Typography
+                    sx={{
+                      width: '100%',
+                      maxHeight: '2.5em',
+                      lineHeight: '1.25em',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'normal',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                    }}
+                  >
+                    {file.filename}
+                  </Typography>
+                  <Typography variant="caption" sx={{ width: '100%', mt: 0.5 }}>{file.fileSize} bytes</Typography>
                 </Box>
               </Grid>
             ))}
