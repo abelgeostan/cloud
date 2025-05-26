@@ -5,7 +5,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ShareIcon from '@mui/icons-material/Share';
 import DownloadIcon from '@mui/icons-material/Download';
 
-const ContextMenu = ({ open, onClose, position, item, onRename, onDelete }) => {
+// Add onDownload to props
+const ContextMenu = ({ open, onClose, position, item, onRename, onDelete, onDownload }) => {
   return (
     <Menu
       open={open}
@@ -21,23 +22,23 @@ const ContextMenu = ({ open, onClose, position, item, onRename, onDelete }) => {
         </ListItemIcon>
         <ListItemText>Rename</ListItemText>
       </MenuItem>
-      
+
       <MenuItem onClick={() => { onDelete(item); onClose(); }}>
         <ListItemIcon>
           <DeleteIcon fontSize="small" />
         </ListItemIcon>
         <ListItemText>Delete</ListItemText>
       </MenuItem>
-      
+
       {item?.type === 'file' && (
-        <MenuItem onClick={onClose}>
+        <MenuItem onClick={() => { onDownload(item.id, item.filename); onClose(); }}> {/* Call onDownload */}
           <ListItemIcon>
             <DownloadIcon fontSize="small" />
           </ListItemIcon>
           <ListItemText>Download</ListItemText>
         </MenuItem>
       )}
-      
+
       <MenuItem onClick={onClose}>
         <ListItemIcon>
           <ShareIcon fontSize="small" />

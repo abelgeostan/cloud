@@ -50,11 +50,26 @@ const uploadFile = async (file, folderId) => {
   }
 };
 
-// You can add other file-related methods here (e.g., download, delete, rename)
-// const downloadFile = async (fileId) => { ... };
-// const deleteFile = async (fileId) => { ... };
+/**
+ * Downloads a file by its ID.
+ * @param {string} fileId - The ID of the file to download.
+ * @returns {Promise<Blob>} - The file data as a Blob.
+ */
+const downloadFile = async (fileId) => {
+  try {
+    // Make a GET request with responseType 'blob' for binary data
+    const response = await fileService.get(`/download/${fileId}`, {
+      responseType: 'blob', // Important for handling binary file data
+    });
+    return response.data; // Return the blob data
+  } catch (error) {
+    console.error('Error downloading file:', error);
+    throw error;
+  }
+};
 
 export default {
   uploadFile,
+  downloadFile, // Export the new downloadFile function
   // Add other file methods here
 };

@@ -146,6 +146,25 @@ const Dashboard = () => {
     }
   };
 
+  const handleDownloadFile = async (fileId, filename) => {
+    try {
+      console.log(`[Dashboard] Attempting to download file ID: ${fileId}, Name: "${filename}"`);
+      const blobData = await fileService.downloadFile(fileId);
+      const url = window.URL.createObjectURL(new Blob([blobData]));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+      console.log(`[Dashboard] File "${filename}" downloaded successfully.`);
+    } catch (error) {
+      console.error(`[Dashboard] Error downloading file "${filename}":`, error);
+    }
+  };
+
+
   const handleUploadFile = async (filesToUpload) => {
     console.log('[Dashboard] Uploading files:', filesToUpload);
     if (filesToUpload.length > 0) {
@@ -162,10 +181,7 @@ const Dashboard = () => {
   };
 
   return (
-    // Outer Box for the entire dashboard layout (sidebar + main content)
-    // Forced width to 100vw to eliminate potential right-side whitespace from body/html defaults
     <Box sx={{ display: 'flex', height: '100vh', flexDirection: { xs: 'column', md: 'row' }, width: '100vw' }}>
-      {/* Sidebar */}
       <Box sx={{
         width: { xs: '100%', md: 250 },
         height: { xs: 'auto', md: '100vh' },
@@ -183,7 +199,6 @@ const Dashboard = () => {
         />
       </Box>
 
-      {/* Main Content Area */}
       <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', width: '100%' }}>
         <TopBar
           onCreateFolder={handleCreateFolder}
@@ -191,7 +206,6 @@ const Dashboard = () => {
           currentFolder={currentFolder}
         />
 
-        {/* Current folder path display */}
         <Box sx={{ px: 3, pt: 2, pb: 1 }}>
           <Typography variant="caption" component="div" sx={{ fontStyle: 'italic' }}>
             Current Folder: /{currentPathSegments.map(segment => segment.name).join('/')}
@@ -225,22 +239,21 @@ const Dashboard = () => {
             </Button>
           </Box>
         ) : (
-          // Grid container for folders and files
           <Grid container spacing={2} sx={{ width: '100%', margin: 0, px: 3, py: 2 }}>
             {folders.map(folder => (
-              <Grid item key={folder.id}> {/* Removed responsive sizing from Grid item */}
+              <Grid item key={folder.id}>
                 <Box
                   sx={{
                     p: 2,
                     border: '1px solid #ddd',
                     borderRadius: 1,
                     '&:hover': { bgcolor: '#2A303C' },
-                    width: 140, // Fixed width for uniform tiles
-                    height: 120, // Fixed height for uniform tiles
+                    width: 140,
+                    height: 120,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    justifyContent: 'center', // Center content vertically
+                    justifyContent: 'center',
                     textAlign: 'center',
                     overflow: 'hidden',
                   }}
@@ -268,19 +281,19 @@ const Dashboard = () => {
             ))}
 
             {files.map(file => (
-              <Grid item key={file.id}> {/* Removed responsive sizing from Grid item */}
+              <Grid item key={file.id}>
                 <Box
                   sx={{
                     p: 2,
                     border: '1px solid #ddd',
                     borderRadius: 1,
                     '&:hover': { bgcolor: '#2A303C' },
-                    width: 140, // Fixed width for uniform tiles
-                    height: 120, // Fixed height for uniform tiles
+                    width: 140,
+                    height: 120,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    justifyContent: 'center', // Center content vertically
+                    justifyContent: 'center',
                     textAlign: 'center',
                     overflow: 'hidden',
                   }}
@@ -316,6 +329,7 @@ const Dashboard = () => {
         item={contextMenu?.item}
         onRename={handleRename}
         onDelete={handleDelete}
+        onDownload={handleDownloadFile}
       />
     </Box>
   );
