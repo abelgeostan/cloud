@@ -1,7 +1,7 @@
 import axios from 'axios';
-import authService from './authService'; // Import authService to get the token
+import authService from './authService';
 
-const API_BASE_URL = 'http://localhost:8080/api'; // Base URL for your API
+const API_BASE_URL = process.env.REACT_APP_API_URL || "/api";
 
 // Create an Axios instance for folder-related requests
 const folderService = axios.create({

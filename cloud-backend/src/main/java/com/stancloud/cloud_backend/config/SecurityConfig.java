@@ -52,7 +52,7 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true); // Allow cookies, authorization headers, etc.
-        config.setAllowedOrigins(Arrays.asList("http://localhost:5173")); // Your frontend origin
+        config.setAllowedOrigins(Arrays.asList("http://localhost:5173","https://drive.brethren.in")); // Your frontend origin
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Allowed HTTP methods
         config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type")); // Allowed headers (crucial for JWT)
         source.registerCorsConfiguration("/**", config); // Apply this config to all paths

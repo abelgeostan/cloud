@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: ./cloud-frontend
+    ports:
+      - "3001:3000"  # Frontend runs on port 3001
+    environment:
+      - REACT_APP_API_URL=/api  # Relative path since Cloudflare Tunnel will handle routing
+    depends_on:
+      - backend
+
+  backend:
+    build: ./cloud-backend
+    ports:
+      - "8088:8080"  # Backend runs on port 8088
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/clouddb
+      - SPRING_DATASOURCE_USERNAME=clouduser
+      - SPRING_DATASOURCE_PASSWORD=cloudpass
+      - JWT_SECRET=your-secret-key-here
+      - FILE_UPLOAD_DIR=/uploads
+    volumes:
+      - uploads:/uploads
+    depends_on:
+      - db
+
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_DB=clouddb
+      - POSTGRES_USER=clouduser
+      - POSTGRES_PASSWORD=cloudpass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  uploads:
+  postgres_data:
