@@ -1,9 +1,9 @@
 package com.stancloud.cloud_backend.service;
 
-import com.stancloud.cloud_backend.entity.FileData; // Assuming FileData is your file entity
+import com.stancloud.cloud_backend.entity.FileData; 
 import com.stancloud.cloud_backend.entity.Folder;
 import com.stancloud.cloud_backend.entity.User;
-import com.stancloud.cloud_backend.repository.FileDataRepository; // Assuming FileDataRepository is your file repository
+import com.stancloud.cloud_backend.repository.FileDataRepository; 
 import com.stancloud.cloud_backend.repository.FolderRepository;
 import com.stancloud.cloud_backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
