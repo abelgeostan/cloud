@@ -4,13 +4,12 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-RUN npm run build
+RUN npm run build && ls -la /app/dist
 
-# Production stage - serve directly without Nginx
+# Production stage - serve static files
 FROM node:slim
 WORKDIR /app
-COPY --from=build /app/build ./build
-COPY package*.json ./
+COPY --from=build /app/dist ./dist  
 RUN npm install -g serve
 EXPOSE 3000
-CMD ["serve", "-s", "build", "-l", "3000"]
+CMD ["serve", "-s", "dist", "-l", "3000"]
