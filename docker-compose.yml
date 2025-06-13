@@ -1,15 +1,15 @@
 services:
   frontend:
-    image: abelstanley/cloud-frontend:v1
+    image: abelgeostan/cloud-frontend:v1
     ports:
       - "3001:3000"
     environment:
-      - REACT_APP_API_URL=/api
+      - REACT_APP_API_URL=http://192.168.1.123:8088
     depends_on:
       - backend
 
   backend:
-    image: abelstanley/cloud-backend:v1
+    image: abelgeostan/cloud-backend:v1
     ports:
       - "8088:8080"
     environment:

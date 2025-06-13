@@ -1,7 +1,10 @@
 import axios from 'axios';
 import authService from './authService';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || "/api";
+// const API_BASE_URL = process.env.REACT_APP_API_URL || "/api";
+const API_BASE_URL ="http://192.168.1.123:8088/api";
+
+// http://192.168.1.123:8088
 
 // Create an Axios instance for folder-related requests
 const folderService = axios.create({
