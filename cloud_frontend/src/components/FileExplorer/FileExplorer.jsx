@@ -41,7 +41,7 @@ const FileExplorer = ({ folders, onFolderClick, currentFolder, currentPathSegmen
       {folders.map(folder => (
         <div key={folder.id}>
           <button
-            className={`list-group-item list-group-item-action d-flex align-items-center ${
+            className={`list-group-item text-truncate list-group-item-action d-flex align-items-center ${
               currentFolder === folder.id ? 'active' : ''
             }`}
             onClick={() => handleClick(folder.id, folder.name)}

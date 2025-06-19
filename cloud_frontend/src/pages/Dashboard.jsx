@@ -9,6 +9,7 @@ import TopBar from '../components/TopBar/TopBar';
 import ContextMenu from '../components/ContextMenu/ContextMenu';
 import folderService from "../services/folderService";
 import fileService from "../services/fileService";
+import TextInputModal from '../components/Reusable/TextInputModal';
 
 const Dashboard = () => {
   const [folders, setFolders] = useState([]);
@@ -20,6 +21,11 @@ const Dashboard = () => {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const navigate = useNavigate();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalTitle, setModalTitle] = useState('');
+  const [modalDefaultValue, setModalDefaultValue] = useState('');
+  const [onModalSubmit, setOnModalSubmit] = useState(() => () => {});
+
 
   const loadContents = async (folderId = null) => {
     try {
@@ -77,16 +83,20 @@ const Dashboard = () => {
     }
   };
 
-  const handleCreateFolder = async () => {
-    const folderName = prompt('Enter folder name');
-    if (folderName) {
+  const handleCreateFolder = () => {
+    setModalTitle('Create New Folder');
+    setModalDefaultValue('');
+    setOnModalSubmit(() => async (name) => {
       try {
-        await folderService.createFolder({ name: folderName, parentId: currentFolder });
+        await folderService.createFolder({ name, parentId: currentFolder });
         loadContents(currentFolder);
-      } catch (error) {
-        console.error(error);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setModalVisible(false);
       }
-    }
+    });
+    setModalVisible(true);
   };
 
   const handleUploadFile = async (filesToUpload) => {
@@ -108,15 +118,23 @@ const Dashboard = () => {
 
   const handleCloseContextMenu = () => setContextMenu(null);
 
-  const handleRename = async (item) => {
-    const newName = prompt('Enter new name:', item.name);
-    if (newName && newName !== item.name) {
-      try {
-        if (item.type === 'folder') await folderService.renameFolder(item.id, newName);
+  const handleRename = (item) => {
+  setModalTitle('Rename Item');
+  setModalDefaultValue(item.name);
+  setOnModalSubmit(() => async (newName) => {
+    try {
+      if (item.type === 'folder') {
+        await folderService.renameFolder(item.id, newName);
         loadContents(currentFolder);
-      } catch (err) { console.error(err); }
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setModalVisible(false);
     }
-  };
+  });
+  setModalVisible(true);
+};
 
   const handleDelete = async (item) => {
     if (window.confirm(`Delete ${item.name}?`)) {
@@ -200,7 +218,7 @@ const Dashboard = () => {
 
           <Col>
             <div className="mb-3">
-              <span className="text-light fst-italic">Current Folder: /{currentPathSegments.map(seg => seg.name).join('/')}</span>
+              <span className="text-light fst-italic">/{currentPathSegments.map(seg => seg.name).join('/')}</span>
             </div>
 
             {folders.length === 0 && files.length === 0 ? (
@@ -270,8 +288,18 @@ const Dashboard = () => {
           <Button variant="secondary" onClick={handleClosePreview}>Close</Button>
         </Modal.Footer>
       </Modal>
+      <TextInputModal
+        show={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onSubmit={onModalSubmit}
+        title={modalTitle}
+        defaultValue={modalDefaultValue}
+      />
+
     </div>
+    
   );
+  
 };
 
 export default Dashboard;

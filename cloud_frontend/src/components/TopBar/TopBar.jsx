@@ -12,10 +12,10 @@ const TopBar = ({ onCreateFolder, onUploadFile, currentFolder, toggleSidebar }) 
   return (
     <div className="bg-primary text-white d-flex align-items-center justify-content-between px-3 py-2 w-100 shadow" style={{ position: 'sticky', top: 0, zIndex: 1030, height:'70px' }}>
       <div className="d-flex align-items-center gap-3">
-        <button className="btn btn-outline-light" onClick={toggleSidebar}>
+        <button className="btn btn-outline-success" onClick={toggleSidebar}>
           <MenuIcon />
         </button>
-        <h4 className="mb-0">STAN drive</h4>
+        <h4 className="mb-0" ><a href='/dashboard' className='navbar-brand'>STAN Drive</a></h4>
       </div>
 
       <div className="d-flex align-items-center gap-2">
