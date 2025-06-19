@@ -1,8 +1,8 @@
 import axios from 'axios';
 import authService from './authService';
 
-// const API_BASE_URL = process.env.REACT_APP_API_URL || "/api";
-const API_BASE_URL ="http://192.168.1.123:8088/api";
+const API_BASE_URL = `${import.meta.env.VITE_APP_API_URL}/api`;
+//const API_BASE_URL ="http://192.168.1.123:8088/api";
 
 // http://192.168.1.123:8088
 
@@ -78,6 +78,17 @@ const deleteFolder = async (folderId) => {
   }
 };
 
+const getFolderById = async (folderId) => {
+  try {
+    const response = await folderService.get(`/folders/${folderId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching folder by ID:', error);
+    throw error;
+  }
+};
+
+
 // Export individual functions if you prefer, or the default object
 export default {
   getRootContents,
@@ -85,8 +96,7 @@ export default {
   createFolder,
   renameFolder,
   deleteFolder,
+  getFolderById
 };
 
-// NOTE: If you plan to have a separate fileService, it should also use an axios.create instance
-// with a similar interceptor, or you can create a single global axios instance if all your APIs
-// require the same authentication.
+

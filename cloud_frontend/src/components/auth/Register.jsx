@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { TextField, Button, Container, Typography, Box } from '@mui/material';
+import { useNavigate,Link } from 'react-router-dom';
+import { Container, Card, Form, Button, Alert } from 'react-bootstrap';
 import authService from '../../services/authService';
 
 const Register = () => {
   const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
+  const [email, setEmail]     = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError]     = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -16,57 +16,65 @@ const Register = () => {
       await authService.register(username, email, password);
       navigate('/login');
     } catch (err) {
+      console.error("Registration error:", err);
       setError('Registration failed. Please try again.');
     }
   };
 
   return (
-    <Container maxWidth="sm">
-      <Box sx={{ mt: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <Typography component="h1" variant="h5">
-          Sign up
-        </Typography>
-        {error && <Typography color="error">{error}</Typography>}
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            label="Username"
-            autoComplete="username"
-            autoFocus
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            label="Email Address"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            label="Password"
-            type="password"
-            autoComplete="new-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-          >
-            Sign Up
-          </Button>
-        </Box>
-      </Box>
+    <Container fluid className="bg-dark d-flex justify-content-center align-items-center min-vh-100">
+      <Card className="shadow p-4 w-100 text-white border-primary bg-dark" style={{ maxWidth: '450px' }}>
+        <h3 className="text-center mb-4">Sign Up</h3>
+
+        {error && <Alert variant="danger">{error}</Alert>}
+
+        <Form onSubmit={handleSubmit}>
+          <Form.Group className="mb-3" controlId="username">
+            <Form.Label>Username</Form.Label>
+            <Form.Control
+              className='bg-dark text-white'
+              type="text"
+              required
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              autoComplete="username"
+              autoFocus
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3" controlId="email">
+            <Form.Label>Email</Form.Label>
+            <Form.Control
+              className='bg-dark text-white'
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-4" controlId="password">
+            <Form.Label>Password</Form.Label>
+            <Form.Control
+              className='bg-dark text-white'
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password"
+            />
+          </Form.Group>
+          
+          <div className="mb-3 text-end">
+            <span className="text-white">Already have an account? </span>
+            <Link to="/login" className="text-primary">Log in</Link>
+          </div>
+          
+          
+          <button onClick={handleSubmit} type="button" class="btn btn-outline-danger text-white w-100">Sign Up</button>
+        </Form>
+      </Card>
     </Container>
   );
 };

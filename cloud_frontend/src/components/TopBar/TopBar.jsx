@@ -1,68 +1,48 @@
-import React from 'react';
-import { AppBar, Toolbar, TextField, Button, Box, InputAdornment, Typography } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import FileUploadIcon from '@mui/icons-material/FileUpload';
-import SearchIcon from '@mui/icons-material/Search';
+import React, { useRef } from 'react';
+import MenuIcon from '@mui/icons-material/Menu';
 
-const TopBar = ({ onCreateFolder, onUploadFile, currentFolder }) => {
+const TopBar = ({ onCreateFolder, onUploadFile, currentFolder, toggleSidebar }) => {
+  const fileInputRef = useRef();
+
+  const handleFileChange = (e) => {
+    onUploadFile(e.target.files);
+    e.target.value = '';
+  };
+
   return (
-    <AppBar position="static" color="default" elevation={0}>
-      <Toolbar sx={{ justifyContent: 'space-between' }}> {/* Ensure space between elements */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexGrow: 1 }}>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={onCreateFolder}
-          >
-            New Folder
-          </Button>
+    <div className="bg-primary text-white d-flex align-items-center justify-content-between px-3 py-2 w-100 shadow" style={{ position: 'sticky', top: 0, zIndex: 1030, height:'70px' }}>
+      <div className="d-flex align-items-center gap-3">
+        <button className="btn btn-outline-light" onClick={toggleSidebar}>
+          <MenuIcon />
+        </button>
+        <h4 className="mb-0">STAN drive</h4>
+      </div>
 
-          <Button
-            variant="outlined"
-            startIcon={<FileUploadIcon />}
-            component="label"
-          >
-            Upload
+      <div className="d-flex align-items-center gap-2">
+        <button className="btn btn-outline-light " onClick={onCreateFolder}>
+          <i className="bi bi-folder-plus me-1"></i> New Folder
+        </button>
+
+        <button className="btn btn-outline-light" onClick={() => fileInputRef.current.click()}>
+          <i className="bi bi-upload me-1"></i> Upload
+        </button>
+        <input type="file" ref={fileInputRef} style={{ display: 'none' }} multiple onChange={handleFileChange} />
+
+        <div className="d-flex align-items-center">
+          <div className="input-group">
             <input
-              type="file"
-              hidden
-              multiple
-              onChange={(e) => onUploadFile(e.target.files)}
+              type="text"
+              className="form-control border-start-0"
+              placeholder="Search..."
             />
-          </Button>
-        </Box>
+            <button class="btn btn-success my-2 my-sm-0" type="submit">Search</button>
+          </div>
+        </div>
+      </div>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}> {/* Wrapper for search and project name */}
-          <TextField
-            variant="outlined"
-            size="small"
-            placeholder="Search..."
-            sx={{ minWidth: 300 }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon color="action" />
-                </InputAdornment>
-              ),
-            }}
-          />
-          {/* Project Name */}
-          <Typography
-            variant="h6" // Adjust variant for desired size
-            component="div"
-            sx={{
-              fontWeight: 'bold',
-              letterSpacing: 1,
-              color: 'primary.main', // Use primary color from theme
-              //textTransform: 'uppercase', // Optional: make it uppercase
-              ml: 2 // Add some left margin
-            }}
-          >
-            STAN drive
-          </Typography>
-        </Box>
-      </Toolbar>
-    </AppBar>
+      
+        
+    </div>
   );
 };
 

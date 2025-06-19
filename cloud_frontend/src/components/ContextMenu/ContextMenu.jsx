@@ -1,51 +1,75 @@
-import React from 'react';
-import { Menu, MenuItem, ListItemIcon, ListItemText } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ShareIcon from '@mui/icons-material/Share';
-import DownloadIcon from '@mui/icons-material/Download';
+import React, { useEffect, useRef } from 'react';
 
-// Add onDownload to props
 const ContextMenu = ({ open, onClose, position, item, onRename, onDelete, onDownload }) => {
-  return (
-    <Menu
-      open={open}
-      onClose={onClose}
-      anchorReference="anchorPosition"
-      anchorPosition={
-        position ? { top: position.mouseY, left: position.mouseX } : undefined
+  const menuRef = useRef();
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        onClose();
       }
+    };
+
+    if (open) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [open, onClose]);
+
+  if (!open || !position) return null;
+
+  return (
+    <div
+      ref={menuRef}
+      className="position-absolute bg-white shadow rounded"
+      style={{
+        top: `${position.mouseY}px`,
+        left: `${position.mouseX}px`,
+        zIndex: 9999,
+        minWidth: '160px',
+      }}
     >
-      <MenuItem onClick={() => { onRename(item); onClose(); }}>
-        <ListItemIcon>
-          <EditIcon fontSize="small" />
-        </ListItemIcon>
-        <ListItemText>Rename</ListItemText>
-      </MenuItem>
-
-      <MenuItem onClick={() => { onDelete(item); onClose(); }}>
-        <ListItemIcon>
-          <DeleteIcon fontSize="small" />
-        </ListItemIcon>
-        <ListItemText>Delete</ListItemText>
-      </MenuItem>
-
-      {item?.type === 'file' && (
-        <MenuItem onClick={() => { onDownload(item.id, item.filename); onClose(); }}> {/* Call onDownload */}
-          <ListItemIcon>
-            <DownloadIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Download</ListItemText>
-        </MenuItem>
-      )}
-
-      <MenuItem onClick={onClose}>
-        <ListItemIcon>
-          <ShareIcon fontSize="small" />
-        </ListItemIcon>
-        <ListItemText>Share</ListItemText>
-      </MenuItem>
-    </Menu>
+      <ul className="list-group list-group-flush m-0">
+        <li
+          className="list-group-item list-group-item-action"
+          onClick={() => {
+            onRename(item);
+            onClose();
+          }}
+        >
+          <i className="bi bi-pencil me-2"></i> Rename
+        </li>
+        <li
+          className="list-group-item list-group-item-action text-danger"
+          onClick={() => {
+            onDelete(item);
+            onClose();
+          }}
+        >
+          <i className="bi bi-trash me-2"></i> Delete
+        </li>
+        {item?.type === 'file' && (
+          <li
+            className="list-group-item list-group-item-action"
+            onClick={() => {
+              onDownload(item.id, item.filename);
+              onClose();
+            }}
+          >
+            <i className="bi bi-download me-2"></i> Download
+          </li>
+        )}
+        <li
+          className="list-group-item list-group-item-action"
+          onClick={onClose}
+        >
+          <i className="bi bi-share me-2"></i> Share
+        </li>
+      </ul>
+    </div>
   );
 };
 

@@ -5,7 +5,7 @@ const ProtectedRoute = ({ children }) => {
   const isAuthenticated = localStorage.getItem('user'); // Or use your auth context
   
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/home" replace />;
   }
 
   return children;

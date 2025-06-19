@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { TextField, Button, Container, Typography, Box } from '@mui/material';
-import authService from '../../services/authService'; // Correct path
+import { useNavigate,Link } from 'react-router-dom';
+import { Container, Card, Form, Button, Alert } from 'react-bootstrap';
+import authService from '../../services/authService';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -13,53 +13,53 @@ const Login = () => {
     e.preventDefault();
     try {
       await authService.login(email, password);
-      navigate('/'); // Navigate to the protected route after successful login
+      navigate('/');
     } catch (err) {
-      // Log the full error for debugging
       console.error("Login attempt failed:", err);
-      // Display a more user-friendly error message
       setError('Login failed. Please check your credentials and try again.');
     }
   };
 
   return (
-    <Container maxWidth="sm">
-      <Box sx={{ mt: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <Typography component="h1" variant="h5">
-          Sign in
-        </Typography>
-        {error && <Typography color="error">{error}</Typography>}
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            label="Email Address"
-            autoComplete="email"
-            autoFocus
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            label="Password"
-            type="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-          >
-            Sign In
-          </Button>
-        </Box>
-      </Box>
+    <Container fluid className="bg-dark d-flex justify-content-center align-items-center min-vh-100">
+      <Card className="shadow p-4 w-100 text-white border-primary bg-dark" style={{ maxWidth: '450px' }}>
+        <h3 className="text-center mb-4">Log In</h3>
+
+        {error && <Alert variant="danger">{error}</Alert>}
+
+        <Form onSubmit={handleSubmit}>
+          <Form.Group className="mb-3" controlId="email">
+            <Form.Label>Email</Form.Label>
+            <Form.Control
+              className="bg-dark text-white"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+              autoFocus
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-4" controlId="password">
+            <Form.Label>Password</Form.Label>
+            <Form.Control
+              className="bg-dark text-white"
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+            />
+          </Form.Group>
+          <div className="mb-3 text-end">
+            <span className="text-white">No account? </span>
+            <Link to="/register" className="text-primary">Sign up</Link>
+          </div>
+
+          <button type="submit" class="btn btn-outline-primary w-100 text-white">Sign Up</button>
+        </Form>
+      </Card>
     </Container>
   );
 };

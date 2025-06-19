@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Container, Grid, Typography, Button } from '@mui/material';
+import { Container, Row, Col, Button, Modal } from 'react-bootstrap';
 import FolderIcon from '@mui/icons-material/Folder';
 import AddIcon from '@mui/icons-material/Add';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
@@ -16,37 +16,29 @@ const Dashboard = () => {
   const [currentFolder, setCurrentFolder] = useState(null);
   const [currentPathSegments, setCurrentPathSegments] = useState([{ id: null, name: 'My Drive' }]);
   const [contextMenu, setContextMenu] = useState(null);
+  const [previewFile, setPreviewFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const navigate = useNavigate();
 
-  // Helper function to load contents (root or specific folder)
   const loadContents = async (folderId = null) => {
-    console.log(`[Dashboard] Attempting to load contents for folderId: ${folderId || 'root'}`);
     try {
       const apiResponse = folderId
         ? await folderService.getFolderContents(folderId)
         : await folderService.getRootContents();
 
-      console.log("[Dashboard] Raw API response from backend:", apiResponse);
-
       if (Array.isArray(apiResponse)) {
         setFolders(apiResponse);
         setFiles([]);
-        console.log("[Dashboard] State updated: Folders:", apiResponse, "Files: [] (assumed empty for this endpoint)");
-      }
-      else if (apiResponse && typeof apiResponse === 'object' && (apiResponse.folders !== undefined || apiResponse.files !== undefined)) {
+      } else if (apiResponse && typeof apiResponse === 'object') {
         setFolders(apiResponse.folders || []);
         setFiles(apiResponse.files || []);
-        console.log("[Dashboard] State updated: Folders:", apiResponse.folders, "Files:", apiResponse.files);
-      }
-      else {
-        console.warn("[Dashboard] Backend response for contents is not a valid array or expected object structure:", apiResponse);
+      } else {
         setFolders([]);
         setFiles([]);
       }
     } catch (error) {
-      console.error(`[Dashboard] Error loading contents for folder ${folderId || 'root'}:`, error);
       if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-        console.log("[Dashboard] Authentication error, redirecting to login.");
         navigate('/login');
       }
       setFolders([]);
@@ -55,272 +47,207 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    loadContents(); // Load root contents on initial mount
+    folderService.getFolderById(null)
+      .then(data => setFolders(data.subFolders || []))
+      .catch(() => setFolders([]));
+
+    loadContents();
   }, []);
 
   const handleFolderClick = async (folderId, folderName) => {
     setCurrentFolder(folderId);
-
-    const existingPathIndex = currentPathSegments.findIndex(segment => segment.id === folderId);
-
+    const existingIndex = currentPathSegments.findIndex(seg => seg.id === folderId);
     if (folderId === null) {
       setCurrentPathSegments([{ id: null, name: 'My Drive' }]);
-    } else if (existingPathIndex !== -1) {
-      setCurrentPathSegments(currentPathSegments.slice(0, existingPathIndex + 1));
+    } else if (existingIndex !== -1) {
+      setCurrentPathSegments(currentPathSegments.slice(0, existingIndex + 1));
     } else {
       setCurrentPathSegments([...currentPathSegments, { id: folderId, name: folderName }]);
     }
-
     loadContents(folderId);
   };
 
   const handleGoBack = () => {
     if (currentPathSegments.length > 1) {
-      const parentPathSegments = currentPathSegments.slice(0, currentPathSegments.length - 1);
-      const parentFolder = parentPathSegments[parentPathSegments.length - 1];
-      setCurrentPathSegments(parentPathSegments);
-      setCurrentFolder(parentFolder.id);
-      loadContents(parentFolder.id);
+      const newPath = currentPathSegments.slice(0, -1);
+      const parent = newPath[newPath.length - 1];
+      setCurrentPathSegments(newPath);
+      setCurrentFolder(parent.id);
+      loadContents(parent.id);
     }
-  };
-
-  const handleContextMenu = (event, item) => {
-    event.preventDefault();
-    setContextMenu({
-      mouseX: event.clientX - 2,
-      mouseY: event.clientY - 4,
-      item: item
-    });
-  };
-
-  const handleCloseContextMenu = () => {
-    setContextMenu(null);
   };
 
   const handleCreateFolder = async () => {
     const folderName = prompt('Enter folder name');
     if (folderName) {
       try {
-        console.log(`[Dashboard] Attempting to create folder: "${folderName}" in parent: ${currentFolder}`);
-        const createResponse = await folderService.createFolder({ name: folderName, parentId: currentFolder });
-        console.log("[Dashboard] Folder creation API response:", createResponse);
+        await folderService.createFolder({ name: folderName, parentId: currentFolder });
         loadContents(currentFolder);
       } catch (error) {
-        console.error('[Dashboard] Error creating folder:', error);
+        console.error(error);
       }
     }
   };
 
-  const handleRename = async (item) => {
-    const newName = prompt(`Enter new name for ${item.name}:`);
-    if (newName && newName.trim() !== '' && newName !== item.name) {
+  const handleUploadFile = async (filesToUpload) => {
+    if (filesToUpload.length > 0) {
+      const file = filesToUpload[0];
       try {
-        console.log(`[Dashboard] Attempting to rename ${item.type}: "${item.name}" to "${newName}"`);
-        if (item.type === 'folder') {
-          await folderService.renameFolder(item.id, newName);
-        } else if (item.type === 'file') {
-          console.warn('[Dashboard] File renaming not fully implemented. You need a fileService.');
-        }
-        console.log(`[Dashboard] ${item.type} renamed successfully. Reloading contents.`);
+        await fileService.uploadFile(file, currentFolder);
         loadContents(currentFolder);
       } catch (error) {
-        console.error(`Error renaming ${item.type}:`, error);
+        console.error(error);
       }
+    }
+  };
+
+  const handleContextMenu = (e, item) => {
+    e.preventDefault();
+    setContextMenu({ mouseX: e.clientX - 2, mouseY: e.clientY - 4, item });
+  };
+
+  const handleCloseContextMenu = () => setContextMenu(null);
+
+  const handleRename = async (item) => {
+    const newName = prompt('Enter new name:', item.name);
+    if (newName && newName !== item.name) {
+      try {
+        if (item.type === 'folder') await folderService.renameFolder(item.id, newName);
+        loadContents(currentFolder);
+      } catch (err) { console.error(err); }
     }
   };
 
   const handleDelete = async (item) => {
-    if (window.confirm(`Are you sure you want to delete "${item.name}"?`)) {
+    if (window.confirm(`Delete ${item.name}?`)) {
       try {
-        console.log(`[Dashboard] Attempting to delete ${item.type}: "${item.name}"`);
-        if (item.type === 'folder') {
-          await folderService.deleteFolder(item.id);
-        } else if (item.type === 'file') {
-          console.warn('[Dashboard] File deletion not fully implemented. You need a fileService.');
-        }
-        console.log(`[Dashboard] ${item.type} deleted successfully. Reloading contents.`);
+        if (item.type === 'folder') await folderService.deleteFolder(item.id);
         loadContents(currentFolder);
-      } catch (error) {
-        console.error(`Error deleting ${item.type}:`, error);
-      }
+      } catch (err) { console.error(err); }
     }
   };
 
-  const handleDownloadFile = async (fileId, filename) => {
+  const handleDownloadFile = async (id, name) => {
     try {
-      console.log(`[Dashboard] Attempting to download file ID: ${fileId}, Name: "${filename}"`);
-      const blobData = await fileService.downloadFile(fileId);
-      const url = window.URL.createObjectURL(new Blob([blobData]));
+      const blob = await fileService.downloadFile(id);
+      const url = window.URL.createObjectURL(new Blob([blob]));
       const a = document.createElement('a');
       a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
+      a.download = name;
       a.click();
       window.URL.revokeObjectURL(url);
-      a.remove();
-      console.log(`[Dashboard] File "${filename}" downloaded successfully.`);
+    } catch (err) { console.error(err); }
+  };
+
+  const handleFilePreview = async (file) => {
+    try {
+      const blob = await fileService.downloadFile(file.id);
+      const url = URL.createObjectURL(blob);
+      setPreviewUrl(url);
+      setPreviewFile({ ...file, url });
     } catch (error) {
-      console.error(`[Dashboard] Error downloading file "${filename}":`, error);
+      console.error('Error loading preview:', error);
     }
   };
 
+  const handleClosePreview = () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(null);
+    setPreviewFile(null);
+  };
 
-  const handleUploadFile = async (filesToUpload) => {
-    console.log('[Dashboard] Uploading files:', filesToUpload);
-    if (filesToUpload.length > 0) {
-      const file = filesToUpload[0];
-      try {
-        console.log(`[Dashboard] Sending file "${file.name}" to backend for upload.`);
-        await fileService.uploadFile(file, currentFolder);
-        console.log('[Dashboard] File uploaded successfully. Reloading contents.');
-        loadContents(currentFolder);
-      } catch (error) {
-        console.error('[Dashboard] Error during file upload:', error);
-      }
+  const renderFilePreview = () => {
+    const type = previewFile?.fileType?.toLowerCase() || '';
+    if (type.includes('image')) {
+      return <img src={previewFile.url} alt={previewFile.filename} className="img-fluid" />;
+    } else if (type.includes('pdf') || type.includes('text')) {
+      return (
+        <iframe
+          src={previewFile.url}
+          title="File Preview"
+          width="100%"
+          height="100%"
+          style={{ border: 'none', minHeight: '75vh' }}
+        ></iframe>
+      );
+    } else {
+      return <p className="text-light">Preview not supported for this file type.</p>;
     }
   };
 
   return (
-    <Box sx={{ display: 'flex', height: '100vh', flexDirection: { xs: 'column', md: 'row' }, width: '100vw' }}>
-      <Box sx={{
-        width: { xs: '100%', md: 250 },
-        height: { xs: 'auto', md: '100vh' },
-        bgcolor: 'background.paper',
-        borderRight: { xs: 'none', md: '1px solid #ddd' },
-        borderBottom: { xs: '1px solid #ddd', md: 'none' },
-        display: { xs: 'none', md: 'block' },
-      }}>
-        <FileExplorer
-          folders={folders}
-          onFolderClick={handleFolderClick}
-          currentFolder={currentFolder}
-          currentPathSegments={currentPathSegments}
-          onGoBack={handleGoBack}
-        />
-      </Box>
+    <div className="bg-dark min-vh-100">
+      <TopBar
+        onCreateFolder={handleCreateFolder}
+        onUploadFile={handleUploadFile}
+        currentFolder={currentFolder}
+        toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+      />
 
-      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', width: '100%' }}>
-        <TopBar
-          onCreateFolder={handleCreateFolder}
-          onUploadFile={handleUploadFile}
-          currentFolder={currentFolder}
-        />
+      <Container fluid className="p-3 d-flex flex-grow-1" style={{ paddingTop: 0 }}>
+        <Row className="w-100 flex-grow-1">
+          {sidebarOpen && (
+            <Col md={3} className="border-end bg-dark min-vh-100">
+              <FileExplorer
+                folders={folders}
+                onFolderClick={handleFolderClick}
+                currentFolder={currentFolder}
+                currentPathSegments={currentPathSegments}
+                onGoBack={handleGoBack}
+              />
+            </Col>
+          )}
 
-        <Box sx={{ px: 3, pt: 2, pb: 1 }}>
-          <Typography variant="caption" component="div" sx={{ fontStyle: 'italic' }}>
-            Current Folder: /{currentPathSegments.map(segment => segment.name).join('/')}
-          </Typography>
-        </Box>
+          <Col>
+            <div className="mb-3">
+              <span className="text-light fst-italic">Current Folder: /{currentPathSegments.map(seg => seg.name).join('/')}</span>
+            </div>
 
-        {folders.length === 0 && files.length === 0 ? (
-          <Box sx={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 2
-          }}>
-            <Typography variant="h6">No folders or files yet</Typography>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={handleCreateFolder}
-            >
-              Create Folder
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<FileUploadIcon />}
-              component="label"
-            >
-              Upload File
-              <input type="file" hidden onChange={(e) => handleUploadFile(e.target.files)} />
-            </Button>
-          </Box>
-        ) : (
-          <Grid container spacing={2} sx={{ width: '100%', margin: 0, px: 3, py: 2 }}>
-            {folders.map(folder => (
-              <Grid item key={folder.id}>
-                <Box
-                  sx={{
-                    p: 2,
-                    border: '1px solid #ddd',
-                    borderRadius: 1,
-                    '&:hover': { bgcolor: '#2A303C' },
-                    width: 140,
-                    height: 120,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    textAlign: 'center',
-                    overflow: 'hidden',
-                  }}
-                  onClick={() => handleFolderClick(folder.id, folder.name)}
-                  onContextMenu={(e) => handleContextMenu(e, { type: 'folder', ...folder })}
-                >
-                  <FolderIcon color="primary" sx={{ fontSize: 40, mb: 1 }} />
-                  <Typography
-                    sx={{
-                      width: '100%',
-                      maxHeight: '2.5em',
-                      lineHeight: '1.25em',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'normal',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                    }}
+            {folders.length === 0 && files.length === 0 ? (
+              <div className="text-center my-5">
+                <h5 className="text-light">No folders or files yet</h5>
+                <Button className="me-2" onClick={handleCreateFolder}><AddIcon /> Create Folder</Button>
+                <Button variant="outline-primary" as="label">
+                  <FileUploadIcon /> Upload File
+                  <input type="file" hidden onChange={(e) => handleUploadFile(e.target.files)} />
+                </Button>
+              </div>
+            ) : (
+              <div className="d-flex flex-wrap gap-3">
+                {folders.map(folder => (
+                  <div
+                    key={folder.id}
+                    style={{ width: '140px', aspectRatio: '1 / 1', cursor: 'pointer' }}
+                    onClick={() => handleFolderClick(folder.id, folder.name)}
+                    onContextMenu={(e) => handleContextMenu(e, { type: 'folder', ...folder })}
+                    className="bg-dark border border-primary rounded text-center"
                   >
-                    {folder.name}
-                  </Typography>
-                </Box>
-              </Grid>
-            ))}
+                    <div className="p-2 d-flex flex-column align-items-center justify-content-center h-100">
+                      <FolderIcon fontSize="large" color="secondary" />
+                      <div className="text-light text-truncate w-100">{folder.name}</div>
+                    </div>
+                  </div>
+                ))}
 
-            {files.map(file => (
-              <Grid item key={file.id}>
-                <Box
-                  sx={{
-                    p: 2,
-                    border: '1px solid #ddd',
-                    borderRadius: 1,
-                    '&:hover': { bgcolor: '#2A303C' },
-                    width: 140,
-                    height: 120,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    textAlign: 'center',
-                    overflow: 'hidden',
-                  }}
-                  onContextMenu={(e) => handleContextMenu(e, { type: 'file', ...file })}
-                >
-                  <Typography
-                    sx={{
-                      width: '100%',
-                      maxHeight: '2.5em',
-                      lineHeight: '1.25em',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'normal',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                    }}
+                {files.map(file => (
+                  <div
+                    key={file.id}
+                    style={{ width: '140px', aspectRatio: '1 / 1', cursor: 'pointer' }}
+                    onClick={() => handleFilePreview(file)}
+                    onContextMenu={(e) => handleContextMenu(e, { type: 'file', ...file })}
+                    className="bg-dark border border-primary rounded text-center"
                   >
-                    {file.filename}
-                  </Typography>
-                  <Typography variant="caption" sx={{ width: '100%', mt: 0.5 }}>{file.fileSize} bytes</Typography>
-                </Box>
-              </Grid>
-            ))}
-          </Grid>
-        )}
-      </Box>
+                    <div className="p-2 d-flex flex-column align-items-center justify-content-center h-100">
+                      <div className="text-light text-truncate w-100">{file.filename}</div>
+                      <small className="text-secondary fs-7">{file.fileSize} bytes</small>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Col>
+        </Row>
+      </Container>
 
       <ContextMenu
         open={contextMenu !== null}
@@ -331,7 +258,19 @@ const Dashboard = () => {
         onDelete={handleDelete}
         onDownload={handleDownloadFile}
       />
-    </Box>
+
+      <Modal show={!!previewFile} onHide={handleClosePreview} size="lg" centered>
+        <Modal.Header closeButton className="bg-dark text-white">
+          <Modal.Title>{previewFile?.filename}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="bg-dark text-white" style={{ height: '80vh', overflowY: 'auto' }}>
+          {renderFilePreview()}
+        </Modal.Body>
+        <Modal.Footer className="bg-dark">
+          <Button variant="secondary" onClick={handleClosePreview}>Close</Button>
+        </Modal.Footer>
+      </Modal>
+    </div>
   );
 };
 
