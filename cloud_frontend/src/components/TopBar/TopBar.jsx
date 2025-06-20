@@ -1,7 +1,8 @@
 import React, { useRef } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
-const TopBar = ({ onCreateFolder, onUploadFile, currentFolder, toggleSidebar }) => {
+const TopBar = ({ onCreateFolder, onUploadFile, currentFolder, toggleSidebar, onGoBack }) => {
   const fileInputRef = useRef();
 
   const handleFileChange = (e) => {
@@ -11,9 +12,13 @@ const TopBar = ({ onCreateFolder, onUploadFile, currentFolder, toggleSidebar }) 
 
   return (
     <div className="bg-primary text-white d-flex align-items-center justify-content-between px-3 py-2 w-100 shadow" style={{ position: 'sticky', top: 0, zIndex: 1030, height:'70px' }}>
+     
       <div className="d-flex align-items-center gap-3">
-        <button className="btn btn-outline-dark" onClick={toggleSidebar}>
+        <button className="btn btn-outline-dark d-none d-sm-inline" onClick={toggleSidebar}>
           <MenuIcon />
+        </button>
+        <button className="btn btn-outline-dark btn-sm d-inline d-sm-none" onClick={onGoBack}>
+          <ArrowBackIcon/>
         </button>
         <h4 className="mb-0" ><a href='/dashboard' className='navbar-brand'>STAN Drive</a></h4>
       </div>

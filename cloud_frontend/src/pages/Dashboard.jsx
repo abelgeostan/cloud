@@ -213,12 +213,14 @@ const Dashboard = () => {
         onUploadFile={handleUploadFile}
         currentFolder={currentFolder}
         toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+        onGoBack={handleGoBack}
       />
 
       <Container fluid className="p-3 d-flex flex-grow-1" style={{ paddingTop: 0 }}>
         <Row className="w-100 flex-grow-1">
+          {/* Show sidebar only on desktop */}
           {sidebarOpen && (
-            <Col md={3} className="border-end bg-dark min-vh-100">
+            <Col md={3} className="d-none d-md-block border-end bg-dark min-vh-100">
               <FileExplorer
                 folders={folders}
                 onFolderClick={handleFolderClick}
@@ -228,6 +230,7 @@ const Dashboard = () => {
               />
             </Col>
           )}
+
 
           <Col>
             <div className="mb-3">
