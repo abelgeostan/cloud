@@ -2,14 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Button, Modal } from 'react-bootstrap';
 import FolderIcon from '@mui/icons-material/Folder';
-import AddIcon from '@mui/icons-material/Add';
-import FileUploadIcon from '@mui/icons-material/FileUpload';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+
 import FileExplorer from '../components/FileExplorer/FileExplorer';
 import TopBar from '../components/TopBar/TopBar';
 import ContextMenu from '../components/ContextMenu/ContextMenu';
 import folderService from "../services/folderService";
 import fileService from "../services/fileService";
-import TextInputModal from '../components/Reusable/TextInputModal';
+import TextInputModal from '../components/comp/TextInputModal';
+import DeleteConfirmationModal from '../components/Comp/DeleteConfirmationModal';
 
 const Dashboard = () => {
   const [folders, setFolders] = useState([]);
@@ -25,7 +26,7 @@ const Dashboard = () => {
   const [modalTitle, setModalTitle] = useState('');
   const [modalDefaultValue, setModalDefaultValue] = useState('');
   const [onModalSubmit, setOnModalSubmit] = useState(() => () => {});
-
+  const [deleteModalItem, setDeleteModalItem] = useState(null);
 
   const loadContents = async (folderId = null) => {
     try {
@@ -111,37 +112,47 @@ const Dashboard = () => {
     }
   };
 
-  const handleContextMenu = (e, item) => {
-    e.preventDefault();
-    setContextMenu({ mouseX: e.clientX - 2, mouseY: e.clientY - 4, item });
-  };
-
   const handleCloseContextMenu = () => setContextMenu(null);
 
+  const handleMenuIconClick = (e, item) => {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    setContextMenu({
+      mouseX: rect.left,
+      mouseY: rect.bottom,
+      item
+    });
+  };
+
   const handleRename = (item) => {
-  setModalTitle('Rename Item');
-  setModalDefaultValue(item.name);
-  setOnModalSubmit(() => async (newName) => {
-    try {
-      if (item.type === 'folder') {
-        await folderService.renameFolder(item.id, newName);
+    setModalTitle('Rename Item');
+    setModalDefaultValue(item.name);
+    setOnModalSubmit(() => async (newName) => {
+      try {
+        if (item.type === 'folder') {
+          await folderService.renameFolder(item.id, newName);
+        }
         loadContents(currentFolder);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setModalVisible(false);
       }
+    });
+    setModalVisible(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteModalItem) return;
+    try {
+      if (deleteModalItem.type === 'folder') {
+        await folderService.deleteFolder(deleteModalItem.id);
+      }
+      loadContents(currentFolder);
     } catch (err) {
       console.error(err);
     } finally {
-      setModalVisible(false);
-    }
-  });
-  setModalVisible(true);
-};
-
-  const handleDelete = async (item) => {
-    if (window.confirm(`Delete ${item.name}?`)) {
-      try {
-        if (item.type === 'folder') await folderService.deleteFolder(item.id);
-        loadContents(currentFolder);
-      } catch (err) { console.error(err); }
+      setDeleteModalItem(null);
     }
   };
 
@@ -154,7 +165,9 @@ const Dashboard = () => {
       a.download = name;
       a.click();
       window.URL.revokeObjectURL(url);
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleFilePreview = async (file) => {
@@ -221,48 +234,64 @@ const Dashboard = () => {
               <span className="text-light fst-italic">/{currentPathSegments.map(seg => seg.name).join('/')}</span>
             </div>
 
-            {folders.length === 0 && files.length === 0 ? (
-              <div className="text-center my-5">
-                <h5 className="text-light">No folders or files yet</h5>
-                <Button className="me-2" onClick={handleCreateFolder}><AddIcon /> Create Folder</Button>
-                <Button variant="outline-primary" as="label">
-                  <FileUploadIcon /> Upload File
-                  <input type="file" hidden onChange={(e) => handleUploadFile(e.target.files)} />
-                </Button>
-              </div>
-            ) : (
-              <div className="d-flex flex-wrap gap-3">
-                {folders.map(folder => (
-                  <div
-                    key={folder.id}
-                    style={{ width: '140px', aspectRatio: '1 / 1', cursor: 'pointer' }}
-                    onClick={() => handleFolderClick(folder.id, folder.name)}
-                    onContextMenu={(e) => handleContextMenu(e, { type: 'folder', ...folder })}
-                    className="bg-dark border border-primary rounded text-center"
-                  >
-                    <div className="p-2 d-flex flex-column align-items-center justify-content-center h-100">
-                      <FolderIcon fontSize="large" color="secondary" />
-                      <div className="text-light text-truncate w-100">{folder.name}</div>
-                    </div>
-                  </div>
-                ))}
+            <div className="d-flex flex-wrap gap-3">
+              {folders.map(folder => (
+                <div
+                  key={folder.id}
+                  style={{ width: '140px', aspectRatio: '1 / 1', position: 'relative', cursor: 'pointer' }}
+                  onClick={() => handleFolderClick(folder.id, folder.name)}
+                  className="bg-dark border border-primary rounded text-center"
+                >
+                  <div className="position-absolute top-0 end-0 m-1">
+                    <Button
+                      variant="link"
+                      className="text-light p-0"
+                      size="sm"
+                      onClick={(e) => handleMenuIconClick(e, { type: 'folder', ...folder })}
+                    >
+                      <MoreVertIcon
+                        fontSize="small"
+                        sx={{
+                          color: 'white',
+                          '&:hover': {
+                            color: '#593196' // Bootstrap primary blue or any color
+                          }
+                        }}
+                      />
 
-                {files.map(file => (
-                  <div
-                    key={file.id}
-                    style={{ width: '140px', aspectRatio: '1 / 1', cursor: 'pointer' }}
-                    onClick={() => handleFilePreview(file)}
-                    onContextMenu={(e) => handleContextMenu(e, { type: 'file', ...file })}
-                    className="bg-dark border border-primary rounded text-center"
-                  >
-                    <div className="p-2 d-flex flex-column align-items-center justify-content-center h-100">
-                      <div className="text-light text-truncate w-100">{file.filename}</div>
-                      <small className="text-secondary fs-7">{file.fileSize} bytes</small>
-                    </div>
+                    </Button>
                   </div>
-                ))}
-              </div>
-            )}
+                  <div className="p-2 d-flex flex-column align-items-center justify-content-center h-100">
+                    <FolderIcon fontSize="large" color="secondary" />
+                    <div className="text-light text-truncate w-100">{folder.name}</div>
+                  </div>
+                </div>
+              ))}
+
+              {files.map(file => (
+                <div
+                  key={file.id}
+                  style={{ width: '140px', aspectRatio: '1 / 1', position: 'relative', cursor: 'pointer' }}
+                  onClick={() => handleFilePreview(file)}
+                  className="bg-dark border border-primary rounded text-center"
+                >
+                  <div className="position-absolute top-0 end-0 m-1">
+                    <Button
+                      variant="link"
+                      className="text-light p-0"
+                      size="sm"
+                      onClick={(e) => handleMenuIconClick(e, { type: 'file', ...file })}
+                    >
+                      <MoreVertIcon fontSize="small" />
+                    </Button>
+                  </div>
+                  <div className="p-2 d-flex flex-column align-items-center justify-content-center h-100">
+                    <div className="text-light text-truncate w-100">{file.filename}</div>
+                    <small className="text-secondary fs-7">{file.fileSize} bytes</small>
+                  </div>
+                </div>
+              ))}
+            </div>
           </Col>
         </Row>
       </Container>
@@ -273,7 +302,7 @@ const Dashboard = () => {
         position={contextMenu}
         item={contextMenu?.item}
         onRename={handleRename}
-        onDelete={handleDelete}
+        onDelete={(item) => setDeleteModalItem(item)}
         onDownload={handleDownloadFile}
       />
 
@@ -288,6 +317,7 @@ const Dashboard = () => {
           <Button variant="secondary" onClick={handleClosePreview}>Close</Button>
         </Modal.Footer>
       </Modal>
+
       <TextInputModal
         show={modalVisible}
         onClose={() => setModalVisible(false)}
@@ -296,10 +326,14 @@ const Dashboard = () => {
         defaultValue={modalDefaultValue}
       />
 
+      <DeleteConfirmationModal
+        show={!!deleteModalItem}
+        onHide={() => setDeleteModalItem(null)}
+        onConfirm={handleDelete}
+        item={deleteModalItem}
+      />
     </div>
-    
   );
-  
 };
 
 export default Dashboard;

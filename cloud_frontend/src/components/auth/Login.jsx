@@ -57,7 +57,7 @@ const Login = () => {
             <Link to="/register" className="text-primary">Sign up</Link>
           </div>
 
-          <button type="submit" class="btn btn-outline-primary w-100 text-white">Sign Up</button>
+          <button type="submit" class="btn btn-outline-primary w-100 text-white">Log In</button>
         </Form>
       </Card>
     </Container>

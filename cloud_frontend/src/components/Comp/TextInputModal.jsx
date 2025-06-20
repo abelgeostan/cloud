@@ -18,23 +18,26 @@ const TextInputModal = ({ show, onClose, onSubmit, title, defaultValue = '', pla
       <Modal.Header closeButton className="bg-primary text-white">
         <Modal.Title>{title}</Modal.Title>
       </Modal.Header>
-      <Modal.Body className="bg-primary text-white">
+      <Modal.Body className="bg-light text-white">
         <Form.Control
           type="text"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           placeholder={placeholder || 'Enter name'}
           autoFocus
-          className="bg-light"
+          className="primary form-control-lg"
         />
       </Modal.Body>
-      <Modal.Footer className="bg-primary">
-        <Button variant="light" onClick={onClose}>
-          Cancel
+      <Modal.Footer className="bg-light">
+        <div className="d-flex gap-2 w-100">
+        <Button variant="outline-danger" onClick={onClose} className="w-50">
+            Cancel
         </Button>
-        <Button variant="success" onClick={handleSubmit} disabled={!inputValue.trim()}>
-          Yes
+        <Button variant="outline-primary" className="w-50" onClick={handleSubmit} disabled={!inputValue.trim()}>
+            Yes
         </Button>
+        </div>
+
       </Modal.Footer>
     </Modal>
   );
