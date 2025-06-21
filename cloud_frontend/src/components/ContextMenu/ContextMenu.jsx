@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-const ContextMenu = ({ open, onClose, position, item, onRename, onDelete, onDownload }) => {
+const ContextMenu = ({ open, onClose, position, item, onRename, onDelete, onDownload, onShare }) => {
   const menuRef = useRef();
 
   useEffect(() => {
@@ -64,7 +64,10 @@ const ContextMenu = ({ open, onClose, position, item, onRename, onDelete, onDown
         )}
         <li
           className="list-group-item list-group-item-action"
-          onClick={onClose}
+          onClick={()=>{
+            onClose();
+            onShare();
+          }}
         >
           <i className="bi bi-share me-2"></i> Share
         </li>

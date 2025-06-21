@@ -117,4 +117,33 @@ public class FileService {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "File path invalid: " + ex.getMessage(), ex);
         }
     }
+
+    public FileData renameFile(Long fileId, String newName, String userEmail) {
+        System.out.println("new name in file service:"+newName);
+        FileData file = fileRepository.findById(fileId)
+                .orElseThrow(() -> new RuntimeException("File not found"));
+
+        if (!file.getOwner().getEmail().equals(userEmail)) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        String currentName = file.getFilename();
+        String extension = "";
+
+        // Extract original extension
+        int lastDot = currentName.lastIndexOf(".");
+        if (lastDot != -1) {
+            extension = currentName.substring(lastDot); // includes dot (e.g., ".jpg")
+        }
+
+        // If user-provided name doesn't end with the same extension, append it
+        if (!newName.toLowerCase().endsWith(extension.toLowerCase())) {
+            newName += extension;
+        }
+
+        file.setFilename(newName);
+        return fileRepository.save(file);
+    }
+
+
 }

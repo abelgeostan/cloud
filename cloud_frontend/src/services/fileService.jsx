@@ -68,9 +68,31 @@ const downloadFile = async (fileId) => {
     throw error;
   }
 };
+const createShareLink = async (fileId, downloadLimit, expiryInHours) => { {/*it is actually works like view limit cause each time it view, it downloads*/}
+  try {
+    const response = await axios.post(`${import.meta.env.VITE_APP_API_URL}/api/share/create`, {
+      fileId,
+      downloadLimit,
+      expiryInHours,
+    });
+    return response.data; // { shareLink: "/share/xyz..." }
+  } catch (error) {
+    console.error('Error creating share link:', error);
+    throw error;
+  }
+
+
+};
+
+const renameFile = async (fileId, newName) => {
+    await fileService.put(`/rename/${fileId}`, { filename: newName });
+};
+
 
 export default {
   uploadFile,
   downloadFile, // Export the new downloadFile function
+  createShareLink,
+  renameFile,
   // Add other file methods here
 };

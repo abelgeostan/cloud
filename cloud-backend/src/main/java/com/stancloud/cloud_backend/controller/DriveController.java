@@ -1,5 +1,8 @@
 package com.stancloud.cloud_backend.controller;
 
+import com.stancloud.cloud_backend.dto.UpdateFileRequest;
+import com.stancloud.cloud_backend.dto.UpdateFileResponse;
+import com.stancloud.cloud_backend.entity.FileData;
 import com.stancloud.cloud_backend.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource; // Import Resource
@@ -72,6 +75,31 @@ public class DriveController {
                 "Error downloading file", e);
         }
     }
+
+    @PutMapping("/rename/{fileId}")
+    public ResponseEntity<UpdateFileResponse> renameFile(
+            @PathVariable Long fileId,
+            @RequestBody UpdateFileRequest request,
+            @AuthenticationPrincipal(expression = "username") String userEmail) {
+
+        String newFilename = request.getFilename();
+        if (newFilename == null || newFilename.trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Filename cannot be null or empty");
+        }
+
+        
+        FileData fileData = fileService.renameFile(fileId, newFilename, userEmail);
+
+        UpdateFileResponse response = new UpdateFileResponse(
+                fileId,
+                fileData.getFilename(),
+                "File renamed successfully"
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+
 
 
 }

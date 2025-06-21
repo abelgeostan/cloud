@@ -1,7 +1,8 @@
 import React, { useRef } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-
+import logo from '../../assets/standrivelogo.png';
+import rectlogo from '../../assets/stanlogorect.png';
 const TopBar = ({ onCreateFolder, onUploadFile, currentFolder, toggleSidebar, onGoBack }) => {
   const fileInputRef = useRef();
 
@@ -20,7 +21,11 @@ const TopBar = ({ onCreateFolder, onUploadFile, currentFolder, toggleSidebar, on
         <button className="btn btn-outline-dark btn-sm d-inline d-sm-none" onClick={onGoBack}>
           <ArrowBackIcon/>
         </button>
-        <h4 className="mb-0" ><a href='/dashboard' className='navbar-brand'>STAN Drive</a></h4>
+        <a href='/dashboard' ><img src={logo} alt="Logo" height="50" className='btn-sm d-inline d-sm-none'/></a>
+        <a href='/dashboard' ><img src={rectlogo} alt="Logo" height="60" className='d-none d-sm-inline' /></a>
+        
+
+        
       </div>
 
       <div className="d-flex align-items-center gap-2">

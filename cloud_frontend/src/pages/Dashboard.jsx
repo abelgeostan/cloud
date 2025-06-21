@@ -28,6 +28,13 @@ const Dashboard = () => {
   const [onModalSubmit, setOnModalSubmit] = useState(() => () => {});
   const [deleteModalItem, setDeleteModalItem] = useState(null);
 
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareFile, setShareFile] = useState(null);
+  const [downloadLimit, setDownloadLimit] = useState(1);
+  const [expiryHours, setExpiryHours] = useState(24);
+  const [generatedLink, setGeneratedLink] = useState('');
+
+
   const loadContents = async (folderId = null) => {
     try {
       const apiResponse = folderId
@@ -126,12 +133,15 @@ const Dashboard = () => {
 
   const handleRename = (item) => {
     setModalTitle('Rename Item');
-    setModalDefaultValue(item.name);
+    setModalDefaultValue(item.type === 'folder' ? item.name : item.filename);
     setOnModalSubmit(() => async (newName) => {
       try {
         if (item.type === 'folder') {
           await folderService.renameFolder(item.id, newName);
+        }else {
+          await fileService.renameFile(item.id, newName);
         }
+
         loadContents(currentFolder);
       } catch (err) {
         console.error(err);
@@ -205,6 +215,25 @@ const Dashboard = () => {
       return <p className="text-light">Preview not supported for this file type.</p>;
     }
   };
+
+  const handleShare = (item) => {
+    setShareFile(item);
+    setDownloadLimit(1);
+    setExpiryHours(24);
+    setGeneratedLink('');
+    setShowShareModal(true);
+  };
+
+  const handleGenerateLink = async () => {
+    try {
+      const res = await fileService.createShareLink(shareFile.id, downloadLimit*2, expiryHours);
+      setGeneratedLink(`${import.meta.env.VITE_APP_BASE_URL || window.location.origin}${res.shareLink}`);
+    } catch (err) {
+      alert('Failed to create share link');
+      console.error(err);
+    }
+  };
+
 
   return (
     <div className="bg-dark min-vh-100">
@@ -285,7 +314,15 @@ const Dashboard = () => {
                       size="sm"
                       onClick={(e) => handleMenuIconClick(e, { type: 'file', ...file })}
                     >
-                      <MoreVertIcon fontSize="small" />
+                      <MoreVertIcon
+                        fontSize="small"
+                        sx={{
+                          color: 'white',
+                          '&:hover': {
+                            color: '#593196' // Bootstrap primary blue or any color
+                          }
+                        }}
+                      />
                     </Button>
                   </div>
                   <div className="p-2 d-flex flex-column align-items-center justify-content-center h-100">
@@ -307,6 +344,7 @@ const Dashboard = () => {
         onRename={handleRename}
         onDelete={(item) => setDeleteModalItem(item)}
         onDownload={handleDownloadFile}
+        onShare={() => handleShare(contextMenu.item)}
       />
 
       <Modal show={!!previewFile} onHide={handleClosePreview} size="lg" centered>
@@ -335,7 +373,75 @@ const Dashboard = () => {
         onConfirm={handleDelete}
         item={deleteModalItem}
       />
+
+      <Modal show={showShareModal} onHide={() => setShowShareModal(false)} centered>
+        <Modal.Header closeButton className='bg-primary text-white'>
+          <Modal.Title>Share "{shareFile?.filename}"</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="mb-3">
+             <label className="form-label">View Limit</label>  {/*it is actually works like view limit cause each time it view, it downloads*/}
+            <input
+              type="number"
+              min={1}
+              value={downloadLimit}
+              onChange={(e) => setDownloadLimit(parseInt(e.target.value))}
+              className="form-control"
+            />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Expiration Time (in hours)</label>
+            <input
+              type="number"
+              min={1}
+              value={expiryHours}
+              onChange={(e) => setExpiryHours(parseInt(e.target.value))}
+              className="form-control"
+            />
+          </div>
+          {generatedLink && (
+            <div className="alert alert-success">
+              <strong>Share Link:</strong><br />
+              <div className="d-flex align-items-center justify-content-between">
+                <a
+                  href={generatedLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-break me-2"
+                  style={{ flex: 1 }}
+                >
+                  {generatedLink}
+                </a>
+                <Button
+                  variant="primary"
+                  size="md"
+                  onClick={() => {
+                    navigator.clipboard.writeText(generatedLink);
+                  }}
+                >
+                  Copy
+                </Button>
+              </div>
+            </div>
+          )}
+
+        </Modal.Body>
+        <Modal.Footer>
+          <div className="d-flex gap-2 w-100">
+          <Button variant="outline-danger" className='w-50' onClick={() => setShowShareModal(false)}>Close</Button>
+          <Button variant="outline-primary" className='w-50' onClick={handleGenerateLink}>Generate Link</Button>
+          </div> 
+        
+        
+                 
+        </Modal.Footer>
+      </Modal>
+
+
+
     </div>
+    
+
   );
 };
 
