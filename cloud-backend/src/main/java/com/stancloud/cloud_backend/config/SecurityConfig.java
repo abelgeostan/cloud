@@ -33,7 +33,7 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource())) // **CRUCIAL: Apply CORS configuration**
             .csrf(csrf -> csrf.disable()) // Disable CSRF for stateless APIs (common with JWT)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll() // Allow authentication endpoints without auth
+                .requestMatchers("/api/auth/**","/api/share/**").permitAll() // Allow authentication endpoints without auth and share endpoints
                 // Allow OPTIONS requests (CORS preflight) for all authenticated paths
                 // Browsers send an OPTIONS request before the actual GET/POST/PUT/DELETE
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()

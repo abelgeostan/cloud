@@ -100,7 +100,7 @@ public class FileService {
         // 3. Construct the full file path on the server
         Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize(); // Ensure consistency with upload path
         Path filePath = uploadPath.resolve(fileData.getStoragePath()).normalize(); // Resolve against the base upload directory
-
+        System.out.println("trying to download:"+filePath);
         // 4. Check if the file exists and is readable
         if (!Files.exists(filePath) || !Files.isReadable(filePath)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found on server at path: " + filePath.toString());
