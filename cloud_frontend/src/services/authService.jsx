@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API_URL = `${import.meta.env.VITE_APP_API_URL}/api/auth`;
-//const API_URL ="http://192.168.1.123:8088/api/auth";
+
 
 const register = (username, email, password) => {
   return axios.post(`${API_URL}/register`, {

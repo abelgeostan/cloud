@@ -2,7 +2,7 @@ import axios from 'axios';
 import authService from './authService'; 
 
 const API_BASE_URL = `${import.meta.env.VITE_APP_API_URL}/api/drive/files`;
-//const API_BASE_URL ="http://192.168.1.123:8088/api/drive/files";
+
 
 // Create an Axios instance for file-related requests
 const fileService = axios.create({

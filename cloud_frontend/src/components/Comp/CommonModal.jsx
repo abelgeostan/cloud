@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 
-const TextInputModal = ({ show, onClose, onSubmit, title, defaultValue = '', placeholder = '' }) => {
+const CommonModal = ({ show, onClose, onSubmit, title, defaultValue = '', placeholder = '' }) => {
   const [inputValue, setInputValue] = useState(defaultValue);
 
   useEffect(() => {
@@ -43,4 +43,4 @@ const TextInputModal = ({ show, onClose, onSubmit, title, defaultValue = '', pla
   );
 };
 
-export default TextInputModal;
+export default CommonModal;

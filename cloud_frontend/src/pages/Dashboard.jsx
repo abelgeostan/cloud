@@ -9,9 +9,8 @@ import TopBar from '../components/TopBar/TopBar';
 import ContextMenu from '../components/ContextMenu/ContextMenu';
 import folderService from "../services/folderService";
 import fileService from "../services/fileService";
-import TextInputModal from '../components/comp/TextInputModal';
 import DeleteConfirmationModal from '../components/Comp/DeleteConfirmationModal';
-
+import CommonModal from '../components/Comp/CommonModal';
 const Dashboard = () => {
   const [folders, setFolders] = useState([]);
   const [files, setFiles] = useState([]);
@@ -359,7 +358,7 @@ const Dashboard = () => {
         </Modal.Footer>
       </Modal>
 
-      <TextInputModal
+      <CommonModal
         show={modalVisible}
         onClose={() => setModalVisible(false)}
         onSubmit={onModalSubmit}

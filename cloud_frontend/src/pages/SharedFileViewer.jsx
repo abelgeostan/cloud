@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Container, Navbar, Button, Spinner, Alert } from 'react-bootstrap';
+import logo from '../assets/standrivelogo.png';
+import rectlogo from '../assets/stanlogorect.png';
 
 const SharedFileViewer = () => {
   const { token } = useParams();
@@ -66,11 +68,32 @@ const SharedFileViewer = () => {
 
   return (
     <div className="bg-light min-vh-100">
-      <Navbar bg="primary" variant="dark">
-        <Container>
-          <Navbar.Brand href="#">StanCloud Shared File</Navbar.Brand>
+      <Navbar
+        bg="primary"
+        variant="dark"
+        className="bg-primary text-white d-flex align-items-center justify-content-between px-3 py-2 w-100 shadow"
+        style={{ position: 'sticky', top: 0, zIndex: 1030, height: '70px' }}
+        >
+        <Container className="d-flex align-items-center justify-content-start">
+            <a href="/dashboard">
+            <img
+                src={logo}
+                alt="Logo"
+                height="50"
+                className="btn-sm d-inline d-sm-none"
+            />
+            </a>
+            <a href="/dashboard">
+            <img
+                src={rectlogo}
+                alt="Logo"
+                height="60"
+                className="d-none d-sm-inline"
+            />
+            </a>
         </Container>
-      </Navbar>
+        </Navbar>
+
 
       <Container className="py-5">
         {loading && <Spinner animation="border" />}
