@@ -145,5 +145,30 @@ public class FileService {
         return fileRepository.save(file);
     }
 
+    public void deleteFile(Long fileId, String userEmail) {
+        FileData file = fileRepository.findById(fileId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found"));
+
+        // Check if the user is authorized to delete this file
+        if (!file.getOwner().getEmail().equals(userEmail)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unauthorized to delete this file");
+        }
+
+        // Construct the full path to the file on disk
+        Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
+        Path filePath = uploadPath.resolve(file.getStoragePath()).normalize();
+
+        try {
+            // Delete the file from disk
+            Files.deleteIfExists(filePath);
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to delete file from disk: " + e.getMessage(), e);
+        }
+
+        // Now delete the metadata from the database
+        fileRepository.delete(file);
+    }
+
+
 
 }

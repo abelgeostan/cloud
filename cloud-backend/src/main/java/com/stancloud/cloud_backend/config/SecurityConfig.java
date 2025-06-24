@@ -37,6 +37,7 @@ public class SecurityConfig {
                 // Allow OPTIONS requests (CORS preflight) for all authenticated paths
                 // Browsers send an OPTIONS request before the actual GET/POST/PUT/DELETE
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers("/api/admin/**").hasRole("ADMIN") // Secure admin API
                 .requestMatchers("/api/folders/**").authenticated() // Secure folders API
                 .anyRequest().authenticated() // All other requests require authentication
             )

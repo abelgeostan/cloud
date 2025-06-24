@@ -12,4 +12,5 @@ public interface FolderRepository extends JpaRepository<Folder, Long> {
     List<Folder> findByOwnerAndParent(User owner, Folder parent);  // Changed parameter type
     List<Folder> findByOwnerAndParentIsNull(User owner);
     List<Folder> findByOwnerAndParentId(User owner, Long folderId);
+    List<Folder> findByOwnerId(Long ownerId);
 }

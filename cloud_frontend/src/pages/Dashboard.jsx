@@ -156,6 +156,8 @@ const Dashboard = () => {
     try {
       if (deleteModalItem.type === 'folder') {
         await folderService.deleteFolder(deleteModalItem.id);
+      }else{
+        await fileService.deleteFile(deleteModalItem.id);
       }
       loadContents(currentFolder);
     } catch (err) {

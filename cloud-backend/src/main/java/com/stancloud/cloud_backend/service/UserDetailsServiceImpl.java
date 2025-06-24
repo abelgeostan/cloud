@@ -3,6 +3,9 @@ package com.stancloud.cloud_backend.service;
 import com.stancloud.cloud_backend.entity.User;
 import com.stancloud.cloud_backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
 
@@ -23,4 +26,5 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .roles(user.getRole())
                 .build();
     }
+    
 }

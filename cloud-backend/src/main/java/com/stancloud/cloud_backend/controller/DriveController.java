@@ -99,6 +99,20 @@ public class DriveController {
         return ResponseEntity.ok(response);
     }
 
+    @DeleteMapping("/{fileId}")
+    public ResponseEntity<Void> deleteFile(
+            @PathVariable Long fileId,
+            @AuthenticationPrincipal(expression = "username") String userEmail) {
+        try {
+            fileService.deleteFile(fileId, userEmail);
+            return ResponseEntity.noContent().build();
+        } catch (ResponseStatusException e) {
+            throw e; // Re-throw to let Spring handle it
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error deleting file", e);
+        }
+    }
+
 
 
 

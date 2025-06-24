@@ -25,4 +25,14 @@ public class User{
     private String password;
 
     private String role;  //"USER", "ADMIN"
+
+    @Column(nullable = false)
+    private Long storageUsed = 0L; // in bytes
+
+    @Column(nullable = false)
+    private Long storageLimit = 100 * 1024 * 1024L; // 100 MB default
+
+    @Column(nullable = false)
+    private boolean verified = false;
+
 }

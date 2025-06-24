@@ -1,5 +1,8 @@
 package com.stancloud.cloud_backend.entity;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,6 +24,7 @@ public class FileData {
     private String storagePath; // where it’s stored in the server
 
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private User owner;
 
     @ManyToOne

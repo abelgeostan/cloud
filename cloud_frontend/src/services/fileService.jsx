@@ -88,11 +88,21 @@ const renameFile = async (fileId, newName) => {
     await fileService.put(`/rename/${fileId}`, { filename: newName });
 };
 
+const deleteFile = async (fileId) => {
+  try {
+    await fileService.delete(`/${fileId}`);
+  } catch (error) {
+    console.error('Error deleting file:', error);
+    throw error;
+  }
+};
+
 
 export default {
   uploadFile,
-  downloadFile, // Export the new downloadFile function
+  downloadFile, 
   createShareLink,
   renameFile,
+  deleteFile,
   // Add other file methods here
 };

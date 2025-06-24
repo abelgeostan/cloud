@@ -14,4 +14,5 @@ public interface FileDataRepository extends JpaRepository<FileData, Long> {
     List<FileData> findAllByOwnerAndFolderIsNull(User user);  // Only keep one version
     List<FileData> findByOwnerAndFolderId(User owner, Long folderId);
     List<FileData> findByOwnerAndFolderIsNull(User owner);
+    List<FileData> findByOwnerId(Long ownerId);
 }

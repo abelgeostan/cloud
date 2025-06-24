@@ -12,46 +12,64 @@ const FileExplorer = ({ folders, onFolderClick, currentFolder, currentPathSegmen
     );
   };
 
+  const handleSignOut = () => {
+    localStorage.removeItem('user');
+    window.location.href = '/login'; // or use navigate('/login') if you use useNavigate
+  };
+
   return (
-    <div className="list-group list-group-flush">
+    <div className="list-group list-group-flush d-flex flex-column h-100 justify-content-between">
 
-      {/* Always show My Drive */}
-      <button
-        className={`list-group-item list-group-item-action d-flex align-items-center ${
-          currentFolder === null ? 'active' : ''
-        }`}
-        onClick={() => handleClick(null, 'My Drive')}
-      >
-        <i className="bi bi-house-door me-2" />
-        My Drive
-      </button>
-
-      {/* Show Back button only when not in root */}
-      {currentPathSegments.length > 1 && (
+      <div>
+        {/* Always show My Drive */}
         <button
-          className="list-group-item list-group-item-action d-flex align-items-center bg-dark text-white"
-          onClick={onGoBack}
+          className={`list-group-item list-group-item-action d-flex align-items-center ${
+            currentFolder === null ? 'active' : ''
+          }`}
+          onClick={() => handleClick(null, 'My Drive')}
         >
-          <i className="bi bi-arrow-left me-2" />
-          Back
+          <i className="bi bi-house-door me-2" />
+          My Drive
         </button>
-      )}
 
-      {/* Render all folders */}
-      {folders.map(folder => (
-        <div key={folder.id}>
+        {/* Show Back button only when not in root */}
+        {currentPathSegments.length > 1 && (
           <button
-            className={`list-group-item text-truncate list-group-item-action d-flex align-items-center ${
-              currentFolder === folder.id ? 'active' : ''
-            }`}
-            onClick={() => handleClick(folder.id, folder.name)}
+            className="list-group-item list-group-item-action d-flex align-items-center bg-dark text-white"
+            onClick={onGoBack}
           >
-            <i className="bi bi-chevron-right me-2" />
-            <i className="bi bi-folder me-2" />
-            {folder.name}
+            <i className="bi bi-arrow-left me-2" />
+            Back
           </button>
-        </div>
-      ))}
+        )}
+
+        {/* Render all folders */}
+        {folders.map(folder => (
+          <div key={folder.id}>
+            <button
+              className={`list-group-item text-truncate list-group-item-action d-flex align-items-center ${
+                currentFolder === folder.id ? 'active' : ''
+              }`}
+              onClick={() => handleClick(folder.id, folder.name)}
+            >
+              <i className="bi bi-chevron-right me-2" />
+              <i className="bi bi-folder me-2" />
+              {folder.name}
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* Sign Out button */}
+      <div className="p-2">
+        <button
+          className="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center"
+          onClick={handleSignOut}
+        >
+          <i className="bi bi-box-arrow-right me-2" />
+          Sign Out
+        </button>
+      </div>
     </div>
   );
 };
