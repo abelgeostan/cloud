@@ -6,38 +6,64 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
 // App structure
-import ProtectedRoute from './components/ProtectedRoute';
+import ProtectedRoute from './routes/ProtectedRoute';
+import PublicRoute from './routes/PublicRoute';
 import Layout from './components/Layout'; // Your Layout should use Bootstrap now
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
+import SharedFileViewer from './pages/SharedFileViewer';
 
 function App() {
   return (
     <Router>
       <Layout>
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/home" element={<Home />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Navigate to="/dashboard" replace />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
+        <Route
+          path="/login"
+          element={
+            
+              <Login />
+            
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            
+              <Register />
+            
+          }
+        />
+        <Route
+          path="/home"
+          element={
+            <PublicRoute>
+              <Home />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Navigate to="/dashboard" replace />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/share/:token" element={<SharedFileViewer />} />
+        
+      </Routes>
+
       </Layout>
     </Router>
   );
