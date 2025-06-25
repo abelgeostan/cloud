@@ -63,4 +63,25 @@ public class AdminService {
         });
     }
 
+    public User updateUserStorageLimit(Long id, Long newLimit) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + id));
+        
+        if (newLimit < user.getStorageUsed()) {
+            throw new IllegalArgumentException("New storage limit cannot be less than current usage.");
+        }
+        
+        user.setStorageLimit(newLimit);
+        user.setVerified(true);
+        return userRepository.save(user);
+    }
+
+    public long getUserStorageUsage(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + id));
+        
+        // Return the storage used by the user
+        return user.getStorageUsed();
+    }
+
 }

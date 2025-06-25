@@ -27,11 +27,14 @@ public class User{
     private String role;  //"USER", "ADMIN"
 
     @Column(nullable = false)
+    @Builder.Default
     private Long storageUsed = 0L; // in bytes
 
+    @Builder.Default
     @Column(nullable = false)
     private Long storageLimit = 100 * 1024 * 1024L; // 100 MB default
 
+    @Builder.Default
     @Column(nullable = false)
     private boolean verified = false;
 

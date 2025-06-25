@@ -40,6 +40,11 @@ public class FileService {
             folder = folderRepository.findById(folderId)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Folder not found")); // Use ResponseStatusException
         }
+        long fileSize = multipartFile.getSize(); // in bytes
+
+        if (user.getStorageUsed() + fileSize > user.getStorageLimit()) {
+            throw new IllegalStateException("Storage limit exceeded. Contact admin to increase your quota.");
+        }
 
         try {
             // Ensure upload directory exists
@@ -63,6 +68,9 @@ public class FileService {
                     .owner(user)
                     .folder(folder)
                     .build();
+
+            user.setStorageUsed(user.getStorageUsed() + fileSize); // Update user's storage used
+            userRepository.save(user); // Save updated user
 
             return fileRepository.save(fileData);
 
@@ -164,9 +172,14 @@ public class FileService {
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to delete file from disk: " + e.getMessage(), e);
         }
+        User owner = file.getOwner();
+        owner.setStorageUsed(owner.getStorageUsed() - file.getFileSize());
+        userRepository.save(owner);
 
         // Now delete the metadata from the database
         fileRepository.delete(file);
+
+
     }
 
 
