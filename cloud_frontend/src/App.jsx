@@ -14,6 +14,8 @@ import Register from './components/auth/Register';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import SharedFileViewer from './pages/SharedFileViewer';
+import AdminPanel from './pages/AdminPanel';
+import AdminRoute from './routes/AdminRoute';
 
 function App() {
   return (
@@ -61,7 +63,11 @@ function App() {
           }
         />
         <Route path="/share/:token" element={<SharedFileViewer />} />
-        
+        <Route path="/admin" element={
+          <AdminRoute>
+            <AdminPanel />
+          </AdminRoute>
+          }/>
       </Routes>
 
       </Layout>

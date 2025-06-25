@@ -17,6 +17,9 @@ import org.springframework.web.server.ResponseStatusException; // Import Respons
 import java.io.IOException;
 import java.net.MalformedURLException; // Import MalformedURLException
 import java.nio.file.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional; // Import Optional
 
 @Service
@@ -31,53 +34,58 @@ public class FileService {
     // @Value("${file.upload-dir}")
     private final String uploadDir = "uploads"; // Assuming this is the base directory for uploads
 
-    public FileData upload(MultipartFile multipartFile, Long folderId, String userEmail) {
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")); // Use ResponseStatusException
+    public List<FileData> upload(MultipartFile[] multipartFiles, Long folderId, String userEmail) {
+    User user = userRepository.findByEmail(userEmail)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        Folder folder = null;
-        if (folderId != null) {
-            folder = folderRepository.findById(folderId)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Folder not found")); // Use ResponseStatusException
-        }
-        long fileSize = multipartFile.getSize(); // in bytes
+    Folder folder = null;
+    if (folderId != null) {
+        folder = folderRepository.findById(folderId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Folder not found"));
+    }
 
-        if (user.getStorageUsed() + fileSize > user.getStorageLimit()) {
+    List<FileData> uploadedFiles = new ArrayList<>();
+
+    try {
+        Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
+        Files.createDirectories(uploadPath);
+
+        long totalUploadSize = Arrays.stream(multipartFiles).mapToLong(MultipartFile::getSize).sum();
+
+        if (user.getStorageUsed() + totalUploadSize > user.getStorageLimit()) {
             throw new IllegalStateException("Storage limit exceeded. Contact admin to increase your quota.");
         }
 
-        try {
-            // Ensure upload directory exists
-            Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize(); // Get absolute path
-            Files.createDirectories(uploadPath);
-
+        for (MultipartFile multipartFile : multipartFiles) {
             String originalFilename = multipartFile.getOriginalFilename();
-            // Generate a unique filename to prevent collisions and security issues
             String storedFilename = System.currentTimeMillis() + "_" + originalFilename;
-            Path filePath = uploadPath.resolve(storedFilename); // Resolve against the uploadPath
+            Path filePath = uploadPath.resolve(storedFilename);
 
-            // Save file to disk
             Files.copy(multipartFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-            // Save metadata to DB
             FileData fileData = FileData.builder()
                     .filename(originalFilename)
                     .fileType(multipartFile.getContentType())
                     .fileSize(multipartFile.getSize())
-                    .storagePath(storedFilename) // Store only the unique filename, not the full path
+                    .storagePath(storedFilename)
                     .owner(user)
                     .folder(folder)
                     .build();
 
-            user.setStorageUsed(user.getStorageUsed() + fileSize); // Update user's storage used
-            userRepository.save(user); // Save updated user
-
-            return fileRepository.save(fileData);
-
-        } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "File upload failed: " + e.getMessage(), e); // Use ResponseStatusException
+            uploadedFiles.add(fileRepository.save(fileData));
         }
+
+        // Update storage usage after all files are processed
+        user.setStorageUsed(user.getStorageUsed() + totalUploadSize);
+        userRepository.save(user);
+
+        return uploadedFiles;
+
+    } catch (IOException e) {
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "File upload failed: " + e.getMessage(), e);
     }
+}
+
 
     /**
      * Loads a file as a Spring Resource for download.

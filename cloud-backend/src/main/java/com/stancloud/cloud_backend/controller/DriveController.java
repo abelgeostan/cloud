@@ -31,11 +31,11 @@ public class DriveController {
 
     @PostMapping("/upload")
     public ResponseEntity<?> uploadFile(
-            @RequestParam("file") MultipartFile file,
+            @RequestParam("files") MultipartFile[] files,
             @RequestParam(value = "folderId", required = false) Long folderId,
             @AuthenticationPrincipal(expression = "username") String userEmail) {
         // 'username' here is actually the email since you used email as username
-        return ResponseEntity.ok(fileService.upload(file, folderId, userEmail));
+        return ResponseEntity.ok(fileService.upload(files, folderId, userEmail));
     }
 
     @GetMapping("/{folderId}")

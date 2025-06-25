@@ -31,25 +31,31 @@ fileService.interceptors.request.use(
  * @param {string} folderId - The ID of the folder where the file should be uploaded. Can be null for root.
  * @returns {Promise<object>} - The response data from the API.
  */
-const uploadFile = async (file, folderId) => {
+const uploadFile = async (files, folderId) => {
   const formData = new FormData();
-  formData.append('file', file); // 'file' should match the @RequestParam name in your Spring Boot controller
+
+  // Append all files
+  for (let i = 0; i < files.length; i++) {
+    formData.append('files', files[i]); // Must match @RequestParam("files")
+  }
+
   if (folderId) {
-    formData.append('folderId', folderId); // 'folderId' should match the @RequestParam name in your Spring Boot controller
+    formData.append('folderId', folderId);
   }
 
   try {
     const response = await fileService.post('/upload', formData, {
       headers: {
-        'Content-Type': 'multipart/form-data', // Important for file uploads
+        'Content-Type': 'multipart/form-data',
       },
     });
     return response.data;
   } catch (error) {
-    console.error('Error uploading file:', error);
-    throw error; // Re-throw to be handled by the calling component
+    console.error('Error uploading files:', error);
+    throw error;
   }
 };
+
 
 /**
  * Downloads a file by its ID.

@@ -53,10 +53,5 @@ public class AdminController {
     }
 
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/users/{id}/storage-usage")
-    public ResponseEntity<Long> getUserStorageUsage(@PathVariable Long id) {
-        long storageUsed = adminService.getUserStorageUsage(id);
-        return ResponseEntity.ok(storageUsed);
-    }
+    
 }

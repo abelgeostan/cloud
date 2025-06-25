@@ -32,7 +32,7 @@ public class User{
 
     @Builder.Default
     @Column(nullable = false)
-    private Long storageLimit = 100 * 1024 * 1024L; // 100 MB default
+    private Long storageLimit = 5 * 1024 * 1024L; // 100 MB default
 
     @Builder.Default
     @Column(nullable = false)

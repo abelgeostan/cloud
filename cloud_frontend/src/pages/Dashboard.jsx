@@ -107,16 +107,17 @@ const Dashboard = () => {
   };
 
   const handleUploadFile = async (filesToUpload) => {
-    if (filesToUpload.length > 0) {
-      const file = filesToUpload[0];
-      try {
-        await fileService.uploadFile(file, currentFolder);
-        loadContents(currentFolder);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-  };
+  if (!filesToUpload || filesToUpload.length === 0) return;
+
+  try {
+    await fileService.uploadFile(filesToUpload, currentFolder); // files, not FormData
+    loadContents(currentFolder);
+  } catch (error) {
+    console.error("Upload error:", error);
+  }
+};
+
+
 
   const handleCloseContextMenu = () => setContextMenu(null);
 
@@ -268,71 +269,78 @@ const Dashboard = () => {
             </div>
 
             <div className="d-flex flex-wrap gap-3">
-              {folders.map(folder => (
-                <div
-                  key={folder.id}
-                  style={{ width: '140px', aspectRatio: '1 / 1', position: 'relative', cursor: 'pointer' }}
-                  onClick={() => handleFolderClick(folder.id, folder.name)}
-                  className="bg-dark border border-primary rounded text-center"
-                >
-                  <div className="position-absolute top-0 end-0 m-1">
-                    <Button
-                      variant="link"
-                      className="text-light p-0"
-                      size="sm"
-                      onClick={(e) => handleMenuIconClick(e, { type: 'folder', ...folder })}
-                    >
-                      <MoreVertIcon
-                        fontSize="small"
-                        sx={{
-                          color: 'white',
-                          '&:hover': {
-                            color: '#593196' // Bootstrap primary blue or any color
-                          }
-                        }}
-                      />
-
+              {(folders.length === 0 && files.length === 0) ? (
+                <div className="text-light w-100 text-center mt-5">
+                  <h5 className="mb-3">Nothing here yet</h5>
+                  <div className="d-flex justify-content-center gap-3">
+                    <Button variant="primary" onClick={handleCreateFolder}>
+                      <i className="bi bi-folder-plus me-1"></i> Create Folder
                     </Button>
-                  </div>
-                  <div className="p-2 d-flex flex-column align-items-center justify-content-center h-100">
-                    <FolderIcon fontSize="large" color="secondary" />
-                    <div className="text-light text-truncate w-100">{folder.name}</div>
+                    <Button variant="primary" onClick={() => document.querySelector('input[type=file]').click()}>
+                      <i className="bi bi-upload me-1"></i> Upload File
+                    </Button>
+                    <input
+                      type="file"
+                      style={{ display: "none" }}
+                      multiple
+                      onChange={handleUploadFile}
+                    />
+
                   </div>
                 </div>
-              ))}
-
-              {files.map(file => (
-                <div
-                  key={file.id}
-                  style={{ width: '140px', aspectRatio: '1 / 1', position: 'relative', cursor: 'pointer' }}
-                  onClick={() => handleFilePreview(file)}
-                  className="bg-dark border border-primary rounded text-center"
-                >
-                  <div className="position-absolute top-0 end-0 m-1">
-                    <Button
-                      variant="link"
-                      className="text-light p-0"
-                      size="sm"
-                      onClick={(e) => handleMenuIconClick(e, { type: 'file', ...file })}
+              ) : (
+                <>
+                  {folders.map(folder => (
+                    <div
+                      key={folder.id}
+                      style={{ width: '140px', aspectRatio: '1 / 1', position: 'relative', cursor: 'pointer' }}
+                      onClick={() => handleFolderClick(folder.id, folder.name)}
+                      className="bg-dark border border-primary rounded text-center"
                     >
-                      <MoreVertIcon
-                        fontSize="small"
-                        sx={{
-                          color: 'white',
-                          '&:hover': {
-                            color: '#593196' // Bootstrap primary blue or any color
-                          }
-                        }}
-                      />
-                    </Button>
-                  </div>
-                  <div className="p-2 d-flex flex-column align-items-center justify-content-center h-100">
-                    <div className="text-light text-truncate w-100">{file.filename}</div>
-                    <small className="text-secondary fs-7">{file.fileSize} bytes</small>
-                  </div>
-                </div>
-              ))}
+                      <div className="position-absolute top-0 end-0 m-1">
+                        <Button
+                          variant="link"
+                          className="text-light p-0"
+                          size="sm"
+                          onClick={(e) => handleMenuIconClick(e, { type: 'folder', ...folder })}
+                        >
+                          <MoreVertIcon fontSize="small" sx={{ color: 'white', '&:hover': { color: '#593196' } }} />
+                        </Button>
+                      </div>
+                      <div className="p-2 d-flex flex-column align-items-center justify-content-center h-100">
+                        <FolderIcon fontSize="large" color="secondary" />
+                        <div className="text-light text-truncate w-100">{folder.name}</div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {files.map(file => (
+                    <div
+                      key={file.id}
+                      style={{ width: '140px', aspectRatio: '1 / 1', position: 'relative', cursor: 'pointer' }}
+                      onClick={() => handleFilePreview(file)}
+                      className="bg-dark border border-primary rounded text-center"
+                    >
+                      <div className="position-absolute top-0 end-0 m-1">
+                        <Button
+                          variant="link"
+                          className="text-light p-0"
+                          size="sm"
+                          onClick={(e) => handleMenuIconClick(e, { type: 'file', ...file })}
+                        >
+                          <MoreVertIcon fontSize="small" sx={{ color: 'white', '&:hover': { color: '#593196' } }} />
+                        </Button>
+                      </div>
+                      <div className="p-2 d-flex flex-column align-items-center justify-content-center h-100">
+                        <div className="text-light text-truncate w-100">{file.filename}</div>
+                        <small className="text-secondary fs-7">{file.fileSize} bytes</small>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
             </div>
+
           </Col>
         </Row>
       </Container>
@@ -376,10 +384,10 @@ const Dashboard = () => {
       />
 
       <Modal show={showShareModal} onHide={() => setShowShareModal(false)} centered>
-        <Modal.Header closeButton className='bg-primary text-white'>
+        <Modal.Header closeButton className='bg-primary text-white border-0'>
           <Modal.Title>Share "{shareFile?.filename}"</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Body className='bg-dark text-white '>
           <div className="mb-3">
              <label className="form-label">View Limit</label>  {/*it is actually works like view limit cause each time it view, it downloads*/}
             <input
@@ -387,7 +395,7 @@ const Dashboard = () => {
               min={1}
               value={downloadLimit}
               onChange={(e) => setDownloadLimit(parseInt(e.target.value))}
-              className="form-control"
+              className="form-control bg-dark text-white"
             />
           </div>
           <div className="mb-3">
@@ -397,7 +405,7 @@ const Dashboard = () => {
               min={1}
               value={expiryHours}
               onChange={(e) => setExpiryHours(parseInt(e.target.value))}
-              className="form-control"
+              className="form-control bg-dark text-white"
             />
           </div>
           {generatedLink && (
@@ -427,10 +435,10 @@ const Dashboard = () => {
           )}
 
         </Modal.Body>
-        <Modal.Footer>
+        <Modal.Footer className='bg-dark text-white border-0'>
           <div className="d-flex gap-2 w-100">
-          <Button variant="outline-danger" className='w-50' onClick={() => setShowShareModal(false)}>Close</Button>
-          <Button variant="outline-primary" className='w-50' onClick={handleGenerateLink}>Generate Link</Button>
+          <Button variant="danger" className='w-50' onClick={() => setShowShareModal(false)}>Close</Button>
+          <Button variant="primary" className='w-50' onClick={handleGenerateLink}>Generate Link</Button>
           </div> 
         
         
