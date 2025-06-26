@@ -78,6 +78,10 @@ const deleteFolder = async (folderId) => {
 };
 
 const getFolderById = async (folderId) => {
+  if (!folderId) {
+    throw new Error('Invalid folder ID');
+  }
+
   try {
     const response = await folderService.get(`/folders/${folderId}`);
     return response.data;
@@ -86,6 +90,7 @@ const getFolderById = async (folderId) => {
     throw error;
   }
 };
+
 
 
 // Export individual functions if you prefer, or the default object

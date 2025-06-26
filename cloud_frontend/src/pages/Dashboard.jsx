@@ -36,13 +36,18 @@ const Dashboard = () => {
 
   const loadContents = async (folderId = null) => {
     try {
-      const apiResponse = folderId
-        ? await folderService.getFolderContents(folderId)
-        : await folderService.getRootContents();
+      let apiResponse;
+
+      // Avoid calling `/folders/null`
+      if (folderId === null || folderId === undefined) {
+        apiResponse = await folderService.getRootContents();
+      } else {
+        apiResponse = await folderService.getFolderContents(folderId);
+      }
 
       if (Array.isArray(apiResponse)) {
         setFolders(apiResponse);
-        setFiles([]);
+        setFiles([]); // assuming root returns only folders
       } else if (apiResponse && typeof apiResponse === 'object') {
         setFolders(apiResponse.folders || []);
         setFiles(apiResponse.files || []);
@@ -59,13 +64,11 @@ const Dashboard = () => {
     }
   };
 
-  useEffect(() => {
-    folderService.getFolderById(null)
-      .then(data => setFolders(data.subFolders || []))
-      .catch(() => setFolders([]));
 
-    loadContents();
-  }, []);
+  useEffect(() => {
+  loadContents(); // This already handles folderId = null internally
+}, []);
+
 
   const handleFolderClick = async (folderId, folderName) => {
     setCurrentFolder(folderId);
