@@ -33,6 +33,10 @@ build/
 .vscode/
 
 
-# Custom folders
+# Custom folders n files
 uploads/
 dbcammands.txt
+
+Dockerfile
+
+src/main/resources/application.properties

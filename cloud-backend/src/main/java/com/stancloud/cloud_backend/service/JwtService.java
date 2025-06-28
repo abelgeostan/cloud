@@ -1,8 +1,8 @@
 package com.stancloud.cloud_backend.service;
 
-
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
@@ -14,11 +14,13 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    private final String SECRET_KEY = "MIIISVi7rrcTuxUS9eSLTRRhJMFGsBAf9aD2x9Pf75wE7RvbeMS1Rjxe1hQYvplJPdvlFrkiyBmcBA4O8ZZ5AQ==";
+    @Value("${jwt.secret}")
+    private String secretKey;
+
     private final long EXPIRATION_TIME = 1000 * 60 * 60 * 10; // 10 hours
 
     private Key getSignInKey() {
-        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+        return Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
     public String extractUsername(String token) {
