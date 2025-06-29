@@ -33,15 +33,18 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource())) // **CRUCIAL: Apply CORS configuration**
             .csrf(csrf -> csrf.disable()) // Disable CSRF for stateless APIs (common with JWT)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**","/api/share/**").permitAll() // Allow authentication endpoints without auth and share endpoints
+                .requestMatchers("/api/auth/**","/api/share/**","/oauth2/**").permitAll() // Allow authentication endpoints without auth and share endpoints
                 // Allow OPTIONS requests (CORS preflight) for all authenticated paths
                 // Browsers send an OPTIONS request before the actual GET/POST/PUT/DELETE
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN") // Secure admin API
                 .requestMatchers("/api/folders/**").authenticated() // Secure folders API
+                .requestMatchers("/oauth2/success").authenticated() // Secure OAuth2 success endpoint
                 .anyRequest().authenticated() // All other requests require authentication
+            ).oauth2Login(oauth2 -> 
+                oauth2.defaultSuccessUrl("/oauth2/success", true)
             )
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

@@ -8,6 +8,11 @@ const register = (username, email, password) => {
     username,
     email,
     password
+  }).then(response => {
+    if (response.data.token) {
+      localStorage.setItem('user', JSON.stringify(response.data));
+    }
+    return response.data;
   });
 };
 
@@ -31,8 +36,9 @@ const logout = () => {
 
 // Helper to get the current user data from localStorage
 const getCurrentUser = () => {
-  const user = localStorage.getItem('user');
-  return user ? JSON.parse(user) : null;
+  const token = localStorage.getItem('token');
+  const role = localStorage.getItem('role');
+  return { token, role };
 };
 
 export default {
