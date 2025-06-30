@@ -10,7 +10,9 @@ const register = (username, email, password) => {
     password
   }).then(response => {
     if (response.data.token) {
-      localStorage.setItem('user', JSON.stringify(response.data));
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('role', response.data.role);
+
     }
     return response.data;
   });
@@ -24,7 +26,9 @@ const login = (email, password) => {
     // Assuming your backend sends the token directly in the response data,
     // e.g., { token: "your-jwt-token", ...otherUserData }
     if (response.data.token) {
-      localStorage.setItem('user', JSON.stringify(response.data));
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('role', response.data.role);
+
     }
     return response.data;
   });

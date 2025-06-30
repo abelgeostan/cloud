@@ -3,7 +3,7 @@ import axios from 'axios';
 const API_BASE_URL = `${import.meta.env.VITE_APP_API_URL}/api/admin`;
 
 const getAuthHeaders = () => {
-  const token = JSON.parse(localStorage.getItem("user"))?.token;
+  const token = localStorage.getItem('token');
   return {
     headers: {
       Authorization: `Bearer ${token}`

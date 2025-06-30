@@ -13,8 +13,7 @@ const TopBar = ({ onCreateFolder, onUploadFile, currentFolder, toggleSidebar, on
   };
 
   // Get user role from localStorage
-  const user = JSON.parse(localStorage.getItem('user'));
-  const role = user?.role || 'USER';
+  const role = localStorage.getItem('role') || 'USER';
 
   return (
     <nav

@@ -13,7 +13,8 @@ const FileExplorer = ({ folders, onFolderClick, currentFolder, currentPathSegmen
   };
 
   const handleSignOut = () => {
-    localStorage.removeItem('user');
+    localStorage.removeItem('token'); // Clear the token from localStorage
+    localStorage.removeItem('role'); // Clear the role from localStorage
     window.location.href = '/login'; // or use navigate('/login') if you use useNavigate
   };
 

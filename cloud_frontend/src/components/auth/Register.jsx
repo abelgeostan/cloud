@@ -24,7 +24,7 @@ const Register = () => {
     }
     try {
       await authService.register(username, email, password);
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
       console.error("Registration error:", err);
       setError('Registration failed. Please try again.');
