@@ -32,6 +32,11 @@ public class AdminService {
     public void deleteUserById(Long id) {
         userRepository.findById(id).ifPresent(user -> {
 
+            if (user.getRole().equals("ADMIN")) {
+                throw new IllegalArgumentException("Cannot delete admin user.");
+                
+            }
+
             // 1. Delete all files
             List<FileData> files = fileDataRepository.findByOwnerId(user.getId());
             for (FileData file : files) {

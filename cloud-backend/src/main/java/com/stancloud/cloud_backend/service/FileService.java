@@ -7,6 +7,8 @@ import com.stancloud.cloud_backend.repository.FileDataRepository;
 import com.stancloud.cloud_backend.repository.FolderRepository;
 import com.stancloud.cloud_backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource; // Import Resource
 import org.springframework.core.io.UrlResource; // Import UrlResource
 import org.springframework.http.HttpStatus;   // Import HttpStatus
@@ -31,8 +33,8 @@ public class FileService {
     private final UserRepository userRepository;
 
     // It's better to inject this from application.properties for flexibility
-    // @Value("${file.upload-dir}")
-    private final String uploadDir = "uploads"; // Assuming this is the base directory for uploads
+    @Value("${file.upload-dir}")
+    private String uploadDir; 
 
     public List<FileData> upload(MultipartFile[] multipartFiles, Long folderId, String userEmail) {
     User user = userRepository.findByEmail(userEmail)
