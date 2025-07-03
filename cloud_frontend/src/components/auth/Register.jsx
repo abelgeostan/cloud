@@ -170,6 +170,8 @@ const Register = () => {
             </InputGroup>
           </Form.Group>
 
+          <button onClick={handleSubmit} type="button" className="btn btn-outline-primary text-white w-100">Sign Up</button>
+
 
           <div className="mb-3 text-end">
             <span className="text-white">Already have an account? </span>
@@ -190,7 +192,7 @@ const Register = () => {
             Sign in with Google
           </button>
 
-          <button onClick={handleSubmit} type="button" className="btn btn-outline-danger text-white w-100">Sign Up</button>
+          
         </Form>
       </Card>
     </Container>

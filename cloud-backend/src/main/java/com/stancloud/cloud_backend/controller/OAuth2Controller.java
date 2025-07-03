@@ -16,10 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.stancloud.cloud_backend.dto.AuthResponse;
 import com.stancloud.cloud_backend.entity.User;
 import com.stancloud.cloud_backend.repository.UserRepository;
+import com.stancloud.cloud_backend.service.EmailService;
 import com.stancloud.cloud_backend.service.JwtService;
 
 import java.io.IOException;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/oauth2")
@@ -29,6 +31,7 @@ public class OAuth2Controller {
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     @Value("${app.oauth2.redirect}")
     private String frontendRedirectBase;
@@ -62,6 +65,7 @@ public class OAuth2Controller {
                         .role("USER")
                         .build();
                 userRepository.save(user);
+                emailService.sendWelcomeEmail(user.getEmail(), user.getUsername());
             }
 
             String token = jwtService.generateToken(user.getEmail());

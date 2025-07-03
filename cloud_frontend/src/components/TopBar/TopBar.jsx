@@ -101,6 +101,17 @@ const TopBar = ({ onCreateFolder, onUploadFile, currentFolder, toggleSidebar, on
               />
               <button className="btn btn-secondary" type="submit">Search</button>
             </form>
+
+            {/* ✅ Sign Out button*/}
+            <button
+              className="btn btn-danger mt-2 mt-lg-0"
+              onClick={() => {
+                localStorage.clear();
+                window.location.href = '/login';
+              }}
+            >
+              Sign Out
+            </button>
           </div>
         </div>
       </div>

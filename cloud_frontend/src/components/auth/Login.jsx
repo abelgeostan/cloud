@@ -70,6 +70,7 @@ const Login = () => {
               </Button>
             </InputGroup>
           </Form.Group>
+          <button type="submit" className="btn btn-outline-primary w-100 text-white">Log In</button>
           <div className="mb-3 text-end">
             <span className="text-white">No account? </span>
             <Link to="/register" className="text-primary">Sign up</Link>
@@ -89,7 +90,7 @@ const Login = () => {
             Log in with Google
           </button>
 
-          <button type="submit" className="btn btn-outline-primary w-100 text-white">Log In</button>
+          
         </Form>
       </Card>
     </Container>
