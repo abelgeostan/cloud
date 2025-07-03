@@ -3,11 +3,12 @@ import axios from 'axios';
 const API_URL = `${import.meta.env.VITE_APP_API_URL}/api/auth`;
 
 
-const register = (username, email, password) => {
+const register = (username, email, password, otp) => {
   return axios.post(`${API_URL}/register`, {
     username,
     email,
-    password
+    password,
+    otp
   }).then(response => {
     if (response.data.token) {
       localStorage.setItem('token', response.data.token);
@@ -45,9 +46,16 @@ const getCurrentUser = () => {
   return { token, role };
 };
 
+const generateOtp = (email) => {
+  return axios.post(`${API_URL}/generate-otp`, null, { params: { email } });
+};
+
+
+
 export default {
   register,
   login,
   logout,
-  getCurrentUser // Export this helper function
+  getCurrentUser, // Export this helper function
+  generateOtp,
 };

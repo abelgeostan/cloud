@@ -12,6 +12,10 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError]     = useState('');
+  const [otp, setOtp] = useState('');
+  const [isOtpDisabled, setIsOtpDisabled] = useState(false);
+  const [otpButtonText, setOtpButtonText] = useState('Get OTP');
+
   const navigate = useNavigate();
 
   const GOOGLE_AUTH_URL = `${import.meta.env.VITE_APP_API_URL}/oauth2/authorization/google`;
@@ -23,13 +27,46 @@ const Register = () => {
       return;
     }
     try {
-      await authService.register(username, email, password);
+      await authService.register(username, email, password, otp);
       navigate('/dashboard');
     } catch (err) {
       console.error("Registration error:", err);
       setError('Registration failed. Please try again.');
     }
   };
+  const handleGetOtp = async () => {
+    if (!email) {
+      setError('Please enter your email first.');
+      return;
+    }
+
+    try {
+      setIsOtpDisabled(true);
+      setOtpButtonText('Resend in 40s');
+
+      // Call your backend generate-otp endpoint
+      await authService.generateOtp(email);
+
+      // Countdown logic
+      let seconds = 40;
+      const interval = setInterval(() => {
+        seconds -= 1;
+        if (seconds > 0) {
+          setOtpButtonText(`Resend in ${seconds}s`);
+        } else {
+          clearInterval(interval);
+          setIsOtpDisabled(false);
+          setOtpButtonText('Get OTP');
+        }
+      }, 1000);
+    } catch (err) {
+      console.error('OTP error:', err);
+      setError('Failed to send OTP. Try again.');
+      setIsOtpDisabled(false);
+      setOtpButtonText('Get OTP');
+    }
+  };
+
 
   return (
     <Container fluid className="bg-dark d-flex justify-content-center align-items-center min-vh-100">
@@ -113,6 +150,26 @@ const Register = () => {
               </Button>
             </InputGroup>
           </Form.Group>
+          <Form.Group className="mb-3" controlId="otp">
+            <Form.Label>OTP</Form.Label>
+            <InputGroup>
+              <Form.Control
+                className="bg-dark text-white"
+                type="text"
+                placeholder="Enter OTP"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+              />
+              <Button
+                variant="outline-success"
+                onClick={handleGetOtp}
+                disabled={isOtpDisabled}
+              >
+                {otpButtonText}
+              </Button>
+            </InputGroup>
+          </Form.Group>
+
 
           <div className="mb-3 text-end">
             <span className="text-white">Already have an account? </span>

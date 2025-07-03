@@ -27,7 +27,7 @@ public class SharedFileController {
         Integer downloadLimit = (Integer) request.get("downloadLimit");
         Integer expiryInHours = (Integer) request.get("expiryInHours");
 
-        SharedFile sharedFile = sharedFileService.createShareLinkByFileId(fileId, downloadLimit, expiryInHours);
+        SharedFile sharedFile = sharedFileService.createShareLinkByFileId(fileId, downloadLimit/2, expiryInHours);
         return ResponseEntity.ok(Map.of("shareLink", "/share/" + sharedFile.getShareToken()));
     }
 
