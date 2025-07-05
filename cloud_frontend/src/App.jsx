@@ -17,6 +17,7 @@ import SharedFileViewer from './pages/SharedFileViewer';
 import AdminPanel from './pages/AdminPanel';
 import AdminRoute from './routes/AdminRoute';
 import OAuth2RedirectHandler from './services/OAuth2RedirectHandler';
+import ServerHealth from './pages/ServerHealth';
 
 function App() {
   return (
@@ -69,6 +70,9 @@ function App() {
             <AdminPanel />
           </AdminRoute>
         }/>
+
+        <Route path="/server-health" element={<ServerHealth />} />
+
         <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
       </Routes>
 

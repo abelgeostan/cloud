@@ -62,6 +62,7 @@ const ContextMenu = ({ open, onClose, position, item, onRename, onDelete, onDown
             <i className="bi bi-download me-2"></i> Download
           </li>
         )}
+        {item?.type === 'file' && (
         <li
           className="list-group-item list-group-item-action"
           onClick={()=>{
@@ -70,7 +71,9 @@ const ContextMenu = ({ open, onClose, position, item, onRename, onDelete, onDown
           }}
         >
           <i className="bi bi-share me-2"></i> Share
-        </li>
+        </li>  
+        )}
+        
       </ul>
     </div>
   );

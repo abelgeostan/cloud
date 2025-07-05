@@ -32,6 +32,11 @@ const adminService = {
     );
     return response.data;
   },
+  // Get server health status (ADMIN only)
+  getServerHealth: async () => {
+    const response = await axios.get(`${API_BASE_URL}/server-health`, getAuthHeaders());
+    return response.data;
+  }
 };
 
 export default adminService;

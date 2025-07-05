@@ -67,4 +67,15 @@ button:focus-visible {
   }
 } */
 
-
+.hover-danger:hover{
+  background-color: #dc3545 !important;
+}
+.hover-success:hover{
+  background-color: #198754 !important;
+}
+.hover-warning:hover{
+  background-color: #ffc107 !important;
+}
+.hover-info:hover{
+  background-color: #0dcaf0 !important;
+}

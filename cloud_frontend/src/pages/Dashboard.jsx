@@ -11,6 +11,7 @@ import folderService from "../services/folderService";
 import fileService from "../services/fileService";
 import DeleteConfirmationModal from '../components/Comp/DeleteConfirmationModal';
 import CommonModal from '../components/Comp/CommonModal';
+import userService from '../services/userService';
 const Dashboard = () => {
   const [folders, setFolders] = useState([]);
   const [files, setFiles] = useState([]);
@@ -32,6 +33,23 @@ const Dashboard = () => {
   const [downloadLimit, setDownloadLimit] = useState(1);
   const [expiryHours, setExpiryHours] = useState(24);
   const [generatedLink, setGeneratedLink] = useState('');
+  const [isVerified, setIsVerified] = useState(true); // assume true initially
+  const [uploading, setUploading] = useState(false);
+
+
+  useEffect(() => {
+    const checkVerification = async () => {
+      try {
+        const verified = await userService.isUserVerified();
+        setIsVerified(verified);
+      } catch (err) {
+        console.error("Failed to check verification:", err);
+      }
+    };
+
+    checkVerification();
+  }, []);
+
 
 
   const loadContents = async (folderId = null) => {
@@ -110,15 +128,19 @@ const Dashboard = () => {
   };
 
   const handleUploadFile = async (filesToUpload) => {
-  if (!filesToUpload || filesToUpload.length === 0) return;
+    if (!filesToUpload || filesToUpload.length === 0) return;
 
-  try {
-    await fileService.uploadFile(filesToUpload, currentFolder); // files, not FormData
-    loadContents(currentFolder);
-  } catch (error) {
-    console.error("Upload error:", error);
-  }
-};
+    setUploading(true);
+    try {
+      await fileService.uploadFile(filesToUpload, currentFolder);
+      loadContents(currentFolder);
+    } catch (error) {
+      console.error("Upload error:", error);
+    } finally {
+      setUploading(false);
+    }
+  };
+
 
 
 
@@ -239,6 +261,16 @@ const Dashboard = () => {
     }
   };
 
+  function formatFileSize(bytes) {
+    if (bytes === 0) return '0 bytes';
+    const k = 1024;
+    const sizes = ['bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    const size = bytes / Math.pow(k, i);
+    return `${size.toFixed(2)} ${sizes[i]}`;
+  }
+
+
 
   return (
     <div className="bg-dark min-vh-100">
@@ -279,16 +311,19 @@ const Dashboard = () => {
                     <Button variant="primary" onClick={handleCreateFolder}>
                       <i className="bi bi-folder-plus me-1"></i> Create Folder
                     </Button>
-                    <Button variant="primary" onClick={() => document.querySelector('input[type=file]').click()}>
-                      <i className="bi bi-upload me-1"></i> Upload File
-                    </Button>
-                    <input
-                      type="file"
-                      style={{ display: "none" }}
-                      multiple
-                      onChange={handleUploadFile}
-                    />
-
+                    {currentFolder && (
+                      <>
+                        <Button variant="primary" onClick={() => document.querySelector('input[type=file]').click()}>
+                          <i className="bi bi-upload me-1"></i> Upload File
+                        </Button>
+                        <input
+                          type="file"
+                          style={{ display: "none" }}
+                          multiple
+                          onChange={handleUploadFile}
+                        />
+                      </>
+                    )}
                   </div>
                 </div>
               ) : (
@@ -336,7 +371,9 @@ const Dashboard = () => {
                       </div>
                       <div className="p-2 d-flex flex-column align-items-center justify-content-center h-100">
                         <div className="text-light text-truncate w-100">{file.filename}</div>
-                        <small className="text-secondary fs-7">{file.fileSize} bytes</small>
+                        <small className="text-secondary fs-7">
+                          {formatFileSize(file.fileSize)}
+                        </small>
                       </div>
                     </div>
                   ))}
@@ -448,6 +485,26 @@ const Dashboard = () => {
                  
         </Modal.Footer>
       </Modal>
+      {!isVerified && (
+        <div
+          className="alert alert-dismissible alert-danger position-fixed"
+          style={{ bottom: '20px', right: '20px', zIndex: 1050, width: '300px' }}
+        >
+          <button type="button" className="btn-close" data-bs-dismiss="alert"></button>
+          <strong>Oh snap!</strong> You only have 15MB storage limit, <strong>contact admin</strong> to increase it.
+        </div>
+      )}
+
+      {uploading && (
+        <div
+          className="alert alert-info position-fixed"
+          style={{ bottom: '20px', right: '20px', zIndex: 1050, width: '300px' }}
+        >
+          <strong>Uploading...</strong> Please wait while your file(s) are being uploaded.
+        </div>
+      )}
+
+
 
 
 

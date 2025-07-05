@@ -1,7 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import userService from '../../services/userService'; 
 
 const FileExplorer = ({ folders, onFolderClick, currentFolder, currentPathSegments, onGoBack }) => {
   const [expandedFolders, setExpandedFolders] = useState([]);
+  const [storageUsed, setStorageUsed] = useState(0);
+  const [storageLimit, setStorageLimit] = useState(1); // prevent divide-by-zero
+
+  useEffect(() => {
+    const loadStorage = async () => {
+      try {
+        const used = await userService.getUserStorageUsed();
+        const limit = await userService.getUserStorageLimit();
+        setStorageUsed(used);
+        setStorageLimit(limit);
+      } catch (err) {
+        console.error("Failed to load storage info:", err);
+      }
+    };
+
+    loadStorage();
+  }, []);
 
   const handleClick = (folderId, folderName) => {
     onFolderClick(folderId, folderName);
@@ -12,15 +30,10 @@ const FileExplorer = ({ folders, onFolderClick, currentFolder, currentPathSegmen
     );
   };
 
-  const handleSignOut = () => {
-    localStorage.removeItem('token'); // Clear the token from localStorage
-    localStorage.removeItem('role'); // Clear the role from localStorage
-    window.location.href = '/login'; // or use navigate('/login') if you use useNavigate
-  };
+  const usagePercent = Math.min(100, ((storageUsed / storageLimit) * 100).toFixed(2));
 
   return (
-    <div className="list-group list-group-flush d-flex flex-column h-100 justify-content-between">
-
+    <div className="list-group list-group-flush d-flex flex-column h-75 justify-content-between">
       <div>
         {/* Always show My Drive */}
         <button
@@ -61,15 +74,19 @@ const FileExplorer = ({ folders, onFolderClick, currentFolder, currentPathSegmen
         ))}
       </div>
 
-      {/* Sign Out button */}
-      <div className="p-2">
-        <button
-          className="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center"
-          onClick={handleSignOut}
-        >
-          <i className="bi bi-box-arrow-right me-2" />
-          Sign Out
-        </button>
+      {/* ✅ Storage Usage Progress */}
+      <div className="p-3">
+        <div className="progress">
+          <div
+            className="progress-bar progress-bar-striped progress-bar-animated"
+            role="progressbar"
+            aria-valuenow={usagePercent}
+            aria-valuemin="0"
+            aria-valuemax="100"
+            style={{ width: `${usagePercent}%` }}
+          ></div>
+        </div>
+        <small className="text-white">{(storageUsed / (1024 * 1024)).toFixed(2)} MB used of {(storageLimit / (1024 * 1024)).toFixed(2)} MB</small>
       </div>
     </div>
   );

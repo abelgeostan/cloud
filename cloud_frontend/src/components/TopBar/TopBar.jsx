@@ -3,6 +3,8 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import logo from '../../assets/standrivelogo.png';
 import rectlogo from '../../assets/stanlogorect.png';
+import { useState, useEffect } from 'react';
+import userService from '../../services/userService'; // ✅ make sure this import matches your project
 
 const TopBar = ({ onCreateFolder, onUploadFile, currentFolder, toggleSidebar, onGoBack }) => {
   const fileInputRef = useRef();
@@ -14,6 +16,26 @@ const TopBar = ({ onCreateFolder, onUploadFile, currentFolder, toggleSidebar, on
 
   // Get user role from localStorage
   const role = localStorage.getItem('role') || 'USER';
+
+  const [storageUsed, setStorageUsed] = useState(0);
+  const [storageLimit, setStorageLimit] = useState(1); // prevent divide-by-zero
+  const usagePercent = Math.min(100, ((storageUsed / storageLimit) * 100).toFixed(2));
+  
+    useEffect(() => {
+      const loadStorage = async () => {
+        try {
+          const used = await userService.getUserStorageUsed();
+          const limit = await userService.getUserStorageLimit();
+          setStorageUsed(used);
+          setStorageLimit(limit);
+        } catch (err) {
+          console.error("Failed to load storage info:", err);
+        }
+      };
+  
+      loadStorage();
+    }, []);
+  
 
   return (
     <nav
@@ -27,9 +49,11 @@ const TopBar = ({ onCreateFolder, onUploadFile, currentFolder, toggleSidebar, on
           <button className="btn btn-dark d-none d-sm-inline" onClick={toggleSidebar}>
             <MenuIcon />
           </button>
+          {currentFolder!= null && (
           <button className="btn btn-dark btn-sm d-inline d-sm-none" onClick={onGoBack}>
             <ArrowBackIcon />
           </button>
+          )}
         </div>
 
         {/* Logo */}
@@ -82,16 +106,21 @@ const TopBar = ({ onCreateFolder, onUploadFile, currentFolder, toggleSidebar, on
               <i className="bi bi-folder-plus me-1"></i> New Folder
             </button>
 
-            <button className="btn btn-outline-light" onClick={() => fileInputRef.current.click()}>
-              <i className="bi bi-upload me-1"></i> Upload
-            </button>
-            <input
-              type="file"
-              ref={fileInputRef}
-              style={{ display: 'none' }}
-              multiple
-              onChange={handleFileChange}
-            />
+            {currentFolder && (
+              <>
+                <button className="btn btn-outline-light" onClick={() => fileInputRef.current.click()}>
+                  <i className="bi bi-upload me-1"></i> Upload
+                </button>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  style={{ display: 'none' }}
+                  multiple
+                  onChange={handleFileChange}
+                />
+              </>
+            )}
+
 
             <form className="d-flex">
               <input
@@ -112,6 +141,21 @@ const TopBar = ({ onCreateFolder, onUploadFile, currentFolder, toggleSidebar, on
             >
               Sign Out
             </button>
+            {/* Storage Progress Bar - Only Mobile */}
+            <div className="w-100 mt-3 d-block d-lg-none">
+              <div className="progress">
+                <div
+                  className="progress-bar progress-bar-striped progress-bar-animated"
+                  role="progressbar"
+                  aria-valuenow={usagePercent}
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  style={{ width: `${usagePercent}%` }}
+                ></div>
+              </div>
+              <small className="text-white">{(storageUsed / (1024 * 1024)).toFixed(2)} MB used of {(storageLimit / (1024 * 1024)).toFixed(2)} MB</small>
+            </div>
+
           </div>
         </div>
       </div>
