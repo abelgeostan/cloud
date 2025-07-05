@@ -1,6 +1,7 @@
 import React from 'react';
 import { Container } from '@mui/material'; // Re-import Container
 import { Outlet } from 'react-router-dom';
+import Footer from './Comp/Footer'; // Import Footer component
 
 const Layout = ({ children }) => {
   return (
@@ -10,6 +11,7 @@ const Layout = ({ children }) => {
       {/* disableGutters prevents the default horizontal padding that caused whitespace */}
       <Container maxWidth={false} disableGutters> {/* Changed maxWidth to false for full width */}
         {children || <Outlet />}
+        <Footer />
       </Container>
     </>
   );

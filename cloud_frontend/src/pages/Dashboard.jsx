@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Button, Modal } from 'react-bootstrap';
 import FolderIcon from '@mui/icons-material/Folder';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-
+import Footer from '../components/Comp/Footer';
 import FileExplorer from '../components/FileExplorer/FileExplorer';
 import TopBar from '../components/TopBar/TopBar';
 import ContextMenu from '../components/ContextMenu/ContextMenu';
@@ -35,6 +35,8 @@ const Dashboard = () => {
   const [generatedLink, setGeneratedLink] = useState('');
   const [isVerified, setIsVerified] = useState(true); // assume true initially
   const [uploading, setUploading] = useState(false);
+  const [loadingPreview, setLoadingPreview] = useState(false);
+
 
 
   useEffect(() => {
@@ -208,6 +210,7 @@ const Dashboard = () => {
   };
 
   const handleFilePreview = async (file) => {
+    setLoadingPreview(true);
     try {
       const blob = await fileService.downloadFile(file.id);
       const url = URL.createObjectURL(blob);
@@ -215,8 +218,11 @@ const Dashboard = () => {
       setPreviewFile({ ...file, url });
     } catch (error) {
       console.error('Error loading preview:', error);
+    } finally {
+      setLoadingPreview(false);
     }
   };
+
 
   const handleClosePreview = () => {
     if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -383,7 +389,10 @@ const Dashboard = () => {
 
           </Col>
         </Row>
+        
+        
       </Container>
+      
 
       <ContextMenu
         open={contextMenu !== null}
@@ -504,9 +513,18 @@ const Dashboard = () => {
         </div>
       )}
 
+      
+      {loadingPreview && (
+        <div
+          className="alert alert-info position-fixed"
+          style={{ bottom: '20px', right: '20px', zIndex: 2000, width: '300px' }}
+        >
+          <strong>Opening...</strong> Please wait while the file preview loads.
+        </div>
+      )}
 
 
-
+      
 
     </div>
     

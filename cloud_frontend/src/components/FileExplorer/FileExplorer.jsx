@@ -32,6 +32,20 @@ const FileExplorer = ({ folders, onFolderClick, currentFolder, currentPathSegmen
 
   const usagePercent = Math.min(100, ((storageUsed / storageLimit) * 100).toFixed(2));
 
+  // Helper to format bytes nicely
+  const formatSize = (bytes) => {
+    if (bytes < 1024) {
+      return `${bytes} bytes`;
+    } else if (bytes < 1024 * 1024) {
+      return `${(bytes / 1024).toFixed(2)} KB`;
+    } else if (bytes < 1024 * 1024 * 1024) {
+      return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+    } else {
+      return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+    }
+  };
+
+
   return (
     <div className="list-group list-group-flush d-flex flex-column h-75 justify-content-between">
       <div>
@@ -86,9 +100,17 @@ const FileExplorer = ({ folders, onFolderClick, currentFolder, currentPathSegmen
             style={{ width: `${usagePercent}%` }}
           ></div>
         </div>
-        <small className="text-white">{(storageUsed / (1024 * 1024)).toFixed(2)} MB used of {(storageLimit / (1024 * 1024)).toFixed(2)} MB</small>
+        <small className="text-white">
+          {formatSize(storageUsed)} used of {formatSize(storageLimit)}
+        </small>
+
       </div>
+
+      
+
+
     </div>
+
   );
 };
 

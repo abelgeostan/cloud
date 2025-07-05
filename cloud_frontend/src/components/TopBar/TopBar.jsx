@@ -35,6 +35,20 @@ const TopBar = ({ onCreateFolder, onUploadFile, currentFolder, toggleSidebar, on
   
       loadStorage();
     }, []);
+
+    // Helper to format bytes nicely
+  const formatSize = (bytes) => {
+    if (bytes < 1024) {
+      return `${bytes} bytes`;
+    } else if (bytes < 1024 * 1024) {
+      return `${(bytes / 1024).toFixed(2)} KB`;
+    } else if (bytes < 1024 * 1024 * 1024) {
+      return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+    } else {
+      return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+    }
+  };
+
   
 
   return (
@@ -153,9 +167,10 @@ const TopBar = ({ onCreateFolder, onUploadFile, currentFolder, toggleSidebar, on
                   style={{ width: `${usagePercent}%` }}
                 ></div>
               </div>
-              <small className="text-white">{(storageUsed / (1024 * 1024)).toFixed(2)} MB used of {(storageLimit / (1024 * 1024)).toFixed(2)} MB</small>
+              <small className="text-white">
+                {formatSize(storageUsed)} used of {formatSize(storageLimit)}
+              </small>
             </div>
-
           </div>
         </div>
       </div>
