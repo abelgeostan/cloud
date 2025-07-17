@@ -1,15 +1,53 @@
-# StanDrive — Personal Cloud Drive Application
+# 🌟 StanDrive — Personal Cloud Drive Application
 
-StanDrive is a full-stack personal cloud drive application that allows users to securely upload, view, and manage their files from anywhere. Built with a Spring Boot backend and a React frontend, StanDrive brings Google Drive-like features to a self-hosted environment.
+[🚀 Live Demo](https://drive.brethren.in/) • Self-hosted, Secure, Scalable
+
+**StanDrive** is a full-stack, self-hosted personal cloud storage solution that brings Google Drive-like features to your own server. Built with **Spring Boot** on the backend and **React** on the frontend, StanDrive lets users securely upload, manage, and share files from anywhere, while giving full control over deployment and data.
 
 ---
 
-## 🌐 Tech Stack
+## ⚙️ Tech Stack
 
-- **Backend**: Spring Boot, Spring Security, JPA, PostgreSQL
-- **Frontend**: React, Axios, React Router
-- **Authentication**: JWT-based authentication
-- **Others**: Docker (for deployment), Maven, Postman (API testing)
+### 🔧 Backend
 
+* **Spring Boot** – RESTful API and business logic
+* **Spring Security** – Authentication & authorization
+* **JPA + PostgreSQL** – ORM and relational database
+* **JWT** – Secure token-based session management
+* **Maven** – Build and dependency management
+
+### 💻 Frontend
+
+* **React** – SPA with component-based architecture
+* **Axios** – API integration
+* **React Router** – Client-side routing
+
+### 📦 Deployment
+
+* **Docker** – Containerized deployment for isolation, portability, and scalability
+
+---
+
+## 🔐 Authentication & Security
+
+* Email signup with **OTP verification**
+* **Google OAuth 2.0** login
+* **JWT-based** secure session handling
+* Automated **email notifications** for key actions
+
+---
+
+## 📁 Key Features
+
+* ✅ Clean dashboard to **browse, upload, and manage** folders & files
+* ✅ Easy **file sharing** via public links with **view/download limits**
+* ✅ **Admin panel** to manage users, approve storage upgrades, and monitor system health
+* ✅ **Fully self-hosted** on a home server using Docker containers for reliable and efficient deployment
+
+---
+
+## 🚀 Live Demo
+
+👉 [https://drive.brethren.in/](https://drive.brethren.in/)
 
 
